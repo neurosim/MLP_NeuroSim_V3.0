@@ -2,9 +2,9 @@
 
 
 
-The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://faculty.engineering.asu.edu/shimengyu/) (Arizona State University). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
+The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://faculty.engineering.asu.edu/shimengyu/) (Georgia Institute of Technology). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
 
-This is the released version 3.0 (Feb, 2018) for the tool. In this version, the algorithm weight range is changed from (0,1) in V2.0 to (-1,1). Parrallel read-out architecture is added for digital eNVM based synaptic arrays. More training algorithms are available.
+This is the released version 3.0 (Feb, 2019) for the tool. In this version, the algorithm weight range is changed from (0,1) in V2.0 to (-1,1). Parrallel read-out architecture is added for digital eNVM based synaptic arrays. More training algorithms are available.
 
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo 
 PI: Prof. Shimeng Yu, Georgia Institute of Technology
