@@ -6,9 +6,10 @@ The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://fa
 
 This is the released version 3.0 (Feb, 2019) for the tool. In this version, the algorithm weight range is changed from (0,1) in V2.0 to (-1,1). Parrallel read-out architecture is added for digital eNVM based synaptic arrays. More training algorithms are available.
 
-Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo 
+Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo
 PI: Prof. Shimeng Yu, Georgia Institute of Technology
-If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu(shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Xiaochen Peng (xpeng76@gatech.edu) or Yandong Luo (yluo310@gatech.edu)
+
+If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu (shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Xiaochen Peng (xpeng76@gatech.edu) or Yandong Luo (yluo310@gatech.edu)
 
 This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
 
