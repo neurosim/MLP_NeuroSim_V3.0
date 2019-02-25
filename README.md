@@ -8,7 +8,7 @@ This is the released version 3.0 (Feb, 2019) for the tool. In this version, the 
 
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo 
 PI: Prof. Shimeng Yu, Georgia Institute of Technology
-If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu(shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Xiaochen Peng(xpeng76@gatech.edu) or Yandong Luo(yluo310@gatech.edu)
+If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu(shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Xiaochen Peng (xpeng76@gatech.edu) or Yandong Luo (yluo310@gatech.edu)
 
 This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
 
