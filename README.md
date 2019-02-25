@@ -27,7 +27,7 @@ P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm fram
 ## Installation steps (Linux)
 1. Get the tool from GitHub
 ```
-git clone https://github.com/neurosim/MLP_NeuroSim_2.0.git
+git clone https://github.com/neurosim/MLP_NeuroSimV3.0.git
 ```
 
 2. Extract `MNIST_data.zip` to it’s current directory
