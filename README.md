@@ -1,14 +1,18 @@
-# MLP simlator (+NeuroSim) V2.0
+# MLP simlator (+NeuroSim) V3.0
 
-The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://faculty.engineering.asu.edu/shimengyu/) (Arizona State University). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
+The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://shimeng.ece.gatech.edu/) (Georgia Institute of Technology). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
 
-This is the released version 2.0 (May 1st, 2018) for the tool. Besides analog eNVM (in MLP simulator V1.0), this version also includes some new devices: SRAM, digital eNVM (RRAM, PCM and STT-MRAM) and FeFET, an optimized weight update scheme is introduced to reduce latency and energy in training.
+This is the released version 3.0 (Feb, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs based synaptical array supports parallel read-out. 
+
+Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo 
+PI: Prof. Shimeng Yu, Georgia Institute of Technology
+If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu (shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Xiaochen Peng (xpeng76@gatech.edu) or Yandong Luo (yluo310@gatech.edu).
+
+This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
 
 If you use the tool or adapt the tool in your work or publication, you are required to cite the following reference:
 
 P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm framework for benchmarking synaptic devices and array architectures,*§ IEEE International Electron Devices Meeting (IEDM)*, 2017, San Francisco, USA.
-
-If you have logistic questions or comments on the model, please contact [Prof. Shimeng Yu](mailto:shimengy@asu.edu), and if you have technical questions or comments, please contact [Pai-Yu Chen](mailto:pchen72@asu.edu) and [Xiaochen Peng](mailto:xpeng15@asu.edu).
 
 ## File lists
 1. MATLAB fitting script: `nonlinear_fit.m`
