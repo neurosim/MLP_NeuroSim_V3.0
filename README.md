@@ -2,7 +2,7 @@
 
 The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://shimeng.ece.gatech.edu/) (Georgia Institute of Technology). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
 
-This is the released version 3.0 (Feb, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs based synaptical array supports parallel read-out. 
+This is the released version 3.0 (Feb, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs based synaptical array supports parallel read-out to reduce latency. 
 
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo 
 PI: Prof. Shimeng Yu, Georgia Institute of Technology
@@ -24,7 +24,7 @@ P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm fram
 ## Installation steps (Linux)
 1. Get the tool from GitHub
 ```
-git clone https://github.com/neurosim/MLP_NeuroSim_2.0.git
+git clone https://github.com/neurosim/MLP_NeuroSim_V3.0.git
 ```
 
 2. Extract `MNIST_data.zip` to it’s current directory
