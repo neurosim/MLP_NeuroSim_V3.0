@@ -2,10 +2,10 @@
 
 The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://shimeng.ece.gatech.edu/) (Georgia Institute of Technology). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
 
-This is the released version 3.0 (Feb, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs based synaptical array supports parallel read-out to reduce latency. 
+This is the released version 3.0 (Mar. 1st, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs (e.g. STT-MRAM) based synaptical array supports parallel read-out is introduced to reduce latency. 
 
-Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo 
-PI: Prof. Shimeng Yu, Georgia Institute of Technology
+Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo. 
+
 If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu (shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Xiaochen Peng (xpeng76@gatech.edu) or Yandong Luo (yluo310@gatech.edu).
 
 This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
@@ -39,10 +39,11 @@ make
 
 For the usage of this tool, please refer to the manual.
 
-## References related to this tool 
-1. P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An Integrated Device-to-Algorithm Framework for Benchmarking Synaptic Devices and Array Architectures,*§ IEEE International Electron Devices Meeting (IEDM), 2017, San Francisco, USA.
-2. P.-Y. Chen, X. Peng, S. Yu, ※System-level benchmark of synaptic device characteristics for neuro-inspired computing,§ IEEE SOI-3D-Subthreshold Microelectronics Technology Unified Conference (S3S) 2017, San Francisco, USA.
-3. P.-Y. Chen, S. Yu, ※Partition SRAM and RRAM based synaptic arrays for neuro-inspired computing,*§ IEEE International Symposium on Circuits and Systems (ISCAS)*, 2016, Montreal, Canada.
-4. P.-Y. Chen, B. Lin, I.-T. Wang, T.-H. Hou, J. Ye, S. Vrudhula, J.-S. Seo, Y. Cao, and S. Yu, ※Mitigating effects of non-ideal synaptic device characteristics for on-chip learning,*§ IEEE/ACM International Conference on Computer-Aided Design (ICCAD)*, 2015, Austin, TX, USA.
-5. P.-Y. Chen, D. Kadetotad, Z. Xu, A. Mohanty, B. Lin, J. Ye, S. Vrudhula, J.-S. Seo, Y. Cao, S. Yu, ※Technology-design co-optimization of resistive cross-point array for accelerating learning algorithms on chip,*§ IEEE Design, Automation & Test in Europe (DATE)*, 2015, Grenoble, France.
+## References related to this tool
+1. P.-Y. Chen, S. Yu, "Technological benchmark of analog synaptic devices for neuro-inspired architectures," IEEE Design & Test, 2019.
+2. P.-Y. Chen, X. Peng, S. Yu, “NeuroSim: A circuit-level macro model for benchmarking neuro-inspired architectures in online learning,” IEEE Trans. CAD,vol. 37, no. 12, pp. 3067-3080, 2018.
+3. P.-Y. Chen, X. Peng, S. Yu, "NeuroSim+: An Integrated Device-to-Algorithm Framework for Benchmarking Synaptic Devices and Array Architectures," IEEE International Electron Devices Meeting (IEDM), 2017, San Francisco, USA.
+4. P.-Y. Chen, X. Peng, S. Yu, "System-level benchmark of synaptic device characteristics for neuro-inspired computing," IEEE SOI-3D-Subthreshold Microelectronics Technology Unified Conference (S3S) 2017, San Francisco, USA.
+5. P.-Y. Chen, S. Yu, "Partition SRAM and RRAM based synaptic arrays for neuro-inspired computing,*§ IEEE International Symposium on Circuits and Systems (ISCAS)", 2016, Montreal, Canada.
+
 
