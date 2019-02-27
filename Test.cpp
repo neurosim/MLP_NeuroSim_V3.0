@@ -174,13 +174,7 @@ void Validate() {
 										    }
 									    }
                                         int outputDigits = (int) (Isum /(Imax-Imin)); // the output at the ADC of this column
-                                                                                                               // basically, this is the number of "1" in this column
                                         int outputDigitsRef = (int) (inputSum/(Imax-Imin));
-                                    
-                                        if(outputDigits > param->pSumMaxHardware)
-                                            outputDigits = param->pSumMaxHardware;
-                                        if(outputDigitsRef > param->pSumMaxHardware)
-                                            outputDigitsRef = param->pSumMaxHardware;
                                         outputDigits = outputDigits-outputDigitsRef;
                                             
                                         Dref = (int)(inputSum/Imin);
@@ -316,14 +310,8 @@ void Validate() {
                                             inputSum += static_cast<DigitalNVM*>(arrayHO->cell[arrayHO->refColumnNumber][k])->conductance*static_cast<DigitalNVM*>(arrayHO->cell[arrayHO->refColumnNumber][k])->readVoltage;                                            
                                         }
                                     }
-                                    int outputDigits = (int) (Isum /(Imax-Imin)); // the output at the ADC of this column
-                                                                                                               // basically, this is the number of "1" in this column
+                                    int outputDigits = (int) (Isum /(Imax-Imin)); 
                                     int outputDigitsRef = (int) (inputSum/(Imax-Imin));
-                                    
-                                    if(outputDigits > param->pSumMaxHardware)
-                                        outputDigits = param->pSumMaxHardware;
-                                    if(outputDigitsRef > param->pSumMaxHardware)
-                                        outputDigitsRef = param->pSumMaxHardware;
                                     outputDigits = outputDigits-outputDigitsRef;
  
                                     Dref = (int)(inputSum/Imin);
