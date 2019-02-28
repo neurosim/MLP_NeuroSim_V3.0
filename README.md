@@ -6,13 +6,13 @@ This is the released version 3.0 (Mar. 1st, 2019) for the tool. This version ext
 
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo. 
 
-If you have logistic questions or comments on the model, please contact [Prof. Shimeng Yu](mailto:shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact [Xiaochen Peng](mailto:xpeng76@gatech.edu) or [Yandong Luo](mailto:yluo310@gatech.edu).
-
 This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
 
 If you use the tool or adapt the tool in your work or publication, you are required to cite the following reference:
 
 P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm framework for benchmarking synaptic devices and array architectures,*§ IEEE International Electron Devices Meeting (IEDM)*, 2017, San Francisco, USA.
+
+If you have logistic questions or comments on the model, please contact [Prof. Shimeng Yu](mailto:shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact [Xiaochen Peng](mailto:xpeng76@gatech.edu) or [Yandong Luo](mailto:yluo310@gatech.edu).
 
 ## File lists
 1. MATLAB fitting script: `nonlinear_fit.m`
