@@ -4,6 +4,8 @@ The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://sh
 
 This is the released version 3.0 (Mar. 1st, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs (e.g. STT-MRAM) based synaptical array supports parallel read-out is introduced to reduce latency. 
 
+For the latest version that integrates the NeuroSim with Tensorflow and PyTorch for a flexible neural network topology (instead of the fixed MLP for MNIST dataset in this current version), please go to DNN+NeuroSim V1.0 (https://github.com/neurosim/DNN_NeuroSim_1.0).
+
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo. 
 
 This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
