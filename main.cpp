@@ -69,7 +69,7 @@ int main() {
 	arrayIH->Initialization<RealDevice>();
 	//arrayIH->Initialization<MeasuredDevice>();
 	//arrayIH->Initialization<SRAM>(param->numWeightBit);
-	//arrayIH->Initialization<DigitalNVM>(param->numWeightBit,true);
+	//arrayIH->Initialization<DigitalNVM>(param->numWeightBit,true); // true: consider refColumn
 
 	
 	/* Initialization of synaptic array from hidden to output layer */

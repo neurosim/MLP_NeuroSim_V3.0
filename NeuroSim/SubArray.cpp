@@ -194,8 +194,9 @@ void SubArray::Initialize(int _numRow, int _numCol, double _unitWireRes){  //ini
                 // or how many columns share 1 S/A
 				int numAdder = (int)ceil(((double)numCol/numCellPerSynapse)/numColMuxed);   // numCol is divisible by numCellPerSynapse
 				int numInput = numAdder * numCellPerSynapse;        //XXX input number of MUX, 
-				double resTg = cell.resMemCellOn / numRow * IR_DROP_TOLERANCE;     //transmission gate resistance
-				mux.Initialize(numInput, numColMuxed, resTg, false);
+				// double resTg = cell.resMemCellOn / numRow * IR_DROP_TOLERANCE;     //transmission gate resistance
+				double resTg = cell.resMemCellOn / numRow / 2;
+                mux.Initialize(numInput, numColMuxed, resTg, false);
 
 				if (numColMuxed > 1) {       //if more than one column share 1 S/A
 					muxDecoder.Initialize(REGULAR_ROW, (int)ceil(log2(numColMuxed)), true);
@@ -209,10 +210,11 @@ void SubArray::Initialize(int _numRow, int _numCol, double _unitWireRes){  //ini
                 
                 if (parallelRead==true)
                 {
-                double resTg = cell.resMemCellOn * IR_DROP_TOLERANCE;
-				slSwitchMatrix.Initialize(COL_MODE, numCol, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);     //SL use switch matrix
+                // double resTg = cell.resMemCellOn * IR_DROP_TOLERANCE;
+				double resTg = cell.resMemCellOn / 2;
+                slSwitchMatrix.Initialize(COL_MODE, numCol, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);     //SL use switch matrix
 				
-				resTg = cell.resMemCellOn / numCol * IR_DROP_TOLERANCE;
+				resTg = cell.resMemCellOn / numCol / 2;
 				/* The previous design with seperate WL decoder and BL decoder
                 blSwitchMatrix.Initialize(ROW_MODE, numRow, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);    //BL use switch matrix
                 wlDecoderOutput.Initialize(numRow); 
@@ -227,14 +229,14 @@ void SubArray::Initialize(int _numRow, int _numCol, double _unitWireRes){  //ini
 				wlDecoderOutput.Initialize(numRow);     //WL decoder follower    
 				wlDecoder.Initialize(REGULAR_ROW, (int)ceil(log2(numRow)), false);
 				
-				double resTg = cell.resMemCellOn * IR_DROP_TOLERANCE;
+				double resTg = cell.resMemCellOn / 2;
 				slSwitchMatrix.Initialize(COL_MODE, numCol, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);     //SL use switch matrix
 				
-				resTg = cell.resMemCellOn / numCol * IR_DROP_TOLERANCE;
+				resTg = cell.resMemCellOn / numCol / 2;
 				blSwitchMatrix.Initialize(ROW_MODE, numRow, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);    //BL use switch matrix
 				
 				int numInput = (int)ceil((double)numCol/numColMuxed);     //input number of mux (num of column/ num of column that share one SA)
-				resTg = cell.resMemCellOn / numRow * IR_DROP_TOLERANCE;
+				resTg = cell.resMemCellOn / numRow / 2;
 				mux.Initialize(numInput, numColMuxed, resTg, false);
 
 				if (numColMuxed > 1) {    //if more than one column share one SA
@@ -279,7 +281,7 @@ void SubArray::Initialize(int _numRow, int _numCol, double _unitWireRes){  //ini
 				// Here numColMuxed can mean how many synapses share 1 adder or how many columns share 1 S/A
 				int numAdder = (int)ceil(((double)numCol/numCellPerSynapse)/numColMuxed);   // numCol is divisible by numCellPerSynapse
 				int numInput = numAdder * numCellPerSynapse;    ///XXX input number of mux
-				double resTg = cell.resMemCellOnAtVw / numRow * IR_DROP_TOLERANCE;
+				double resTg = cell.resMemCellOnAtVw / numRow / 2;
 				mux.Initialize(numInput, numColMuxed, resTg, false);
 				if (numColMuxed > 1) {
 					muxDecoder.Initialize(REGULAR_ROW, (int)ceil(log2(numColMuxed)), true);
@@ -291,14 +293,14 @@ void SubArray::Initialize(int _numRow, int _numCol, double _unitWireRes){  //ini
 				subtractor.Initialize(adderBit, numAdder);   // for subtracting Dummy Column 
 				shiftAdd.Initialize(numAdder, adderBit+1, clkFreq, spikingMode, numReadPulse);
 			} else {  //analog mode cross-point
-				double resTg = cell.resMemCellOnAtVw / numCol * IR_DROP_TOLERANCE;
+				double resTg = cell.resMemCellOnAtVw / numCol / 2;
 				wlSwitchMatrix.Initialize(ROW_MODE, numRow, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);
 				
-				resTg = cell.resMemCellOnAtVw / numRow * IR_DROP_TOLERANCE;
+				resTg = cell.resMemCellOnAtVw / numRow / 2;
 				blSwitchMatrix.Initialize(COL_MODE, numCol, resTg, activityRowRead, activityColWrite, numWriteCellPerOperationNeuro, numWritePulse, clkFreq);
 
 				int numInput = (int)ceil((double)numCol/numColMuxed);
-				resTg = cell.resMemCellOnAtVw / numRow * IR_DROP_TOLERANCE;
+				resTg = cell.resMemCellOnAtVw / numRow / 2;
 				mux.Initialize(numInput, numColMuxed, resTg, false);
 
 				if (numColMuxed > 1) {
@@ -355,63 +357,54 @@ void SubArray::CalculateArea() {  //calculate layout area for total design
 				widthArray = lengthRow;
 				areaArray = heightArray * widthArray;
 				
-				if (digitalModeNeuro) {
-          if(this->parallelRead==true)
-          {
-          // the component for parallel readout
-          // the new WL-BL switchmatrix
-          wlBlSwitchMatrix.CalculateArea(heightArray,NULL,NONE);
-          slSwitchMatrix.CalculateArea(NULL, widthArray, NONE);
-				  mux.CalculateArea(NULL, widthArray, NONE);
- 					muxDecoder.CalculateArea(NULL, NULL, NONE);
- 					double minMuxHeight = MAX(muxDecoder.height, mux.height);
- 					mux.CalculateArea(minMuxHeight, widthArray, OVERRIDE);
- 					subtractor.CalculateArea(NULL, widthArray, NONE);
-
-          readCircuit.CalculateUnitArea();
-					readCircuit.CalculateArea(mux.width);
-					if (shiftAddEnable) {
-						shiftAdd.CalculateArea(NULL, widthArray, NONE);
-					}
-                                               
-            height = slSwitchMatrix.height + heightArray + mux.height  + readCircuit.height + shiftAdd.height + subtractor.height;
-  					width = MAX(wlBlSwitchMatrix.width, muxDecoder.width) + widthArray;
-  					area = height * width;
-  					usedArea = areaArray + slSwitchMatrix.area + wlBlSwitchMatrix.area + mux.area + muxDecoder.area + readCircuit.area + shiftAdd.area + subtractor.area;
-            //printf("usedArea is %.6e\n",usedArea);
-            //printf("Array area is %.6e\n",areaArray);
-            //printf("slSwitchMatrix.area is %.6e\n",slSwitchMatrix.area);
-            //printf("mux.area is %.6e\n",mux.area);
-            //printf("readCircuit.area %.6e\n",readCircuit.area);
-  					emptyArea = area - usedArea;
-          }
-          else
-          {
-  					wlDecoder.CalculateArea(heightArray, NULL, NONE);
-  					colDecoder.CalculateArea(NULL, widthArray, NONE);
-  					colDecoderDriver.CalculateArea(NULL, widthArray, NONE);
-                      
-  					// Get Mux height, compare it with Mux decoder height, and select whichever is larger for Mux
-  					mux.CalculateArea(NULL, widthArray, NONE);
-  					muxDecoder.CalculateArea(NULL, NULL, NONE);
-  					double minMuxHeight = MAX(muxDecoder.height, mux.height);
-  					mux.CalculateArea(minMuxHeight, widthArray, OVERRIDE);
-  
-  					voltageSenseAmp.CalculateUnitArea();
-  					voltageSenseAmp.CalculateArea(mux.widthTgShared);
-  					adder.CalculateArea(NULL, widthArray, NONE);
-  					dff.CalculateArea(NULL, widthArray, NONE);
-  					subtractor.CalculateArea(NULL, widthArray, NONE);
-  					if (shiftAddEnable) {
-  						shiftAdd.CalculateArea(NULL, widthArray, NONE);
-  					}
-  					height = colDecoder.height + colDecoderDriver.height + heightArray + mux.height + voltageSenseAmp.height + adder.height + dff.height + shiftAdd.height + subtractor.height;
-  					width = MAX(wlDecoder.width, muxDecoder.width) + widthArray;
-  					area = height * width;
-  					usedArea = areaArray + wlDecoder.area + colDecoder.area + colDecoderDriver.area + mux.area + voltageSenseAmp.area + muxDecoder.area + adder.area + dff.area + shiftAdd.area + subtractor.area;
-  					emptyArea = area - usedArea;
+			    if (digitalModeNeuro) {
+                    if(this->parallelRead==true){
+                      // the component for parallel readout
+                      // the new WL-BL switchmatrix
+                      wlBlSwitchMatrix.CalculateArea(heightArray,NULL,NONE);
+                      slSwitchMatrix.CalculateArea(NULL, widthArray, NONE);
+                      mux.CalculateArea(NULL, widthArray, NONE);
+                      muxDecoder.CalculateArea(NULL, NULL, NONE);
+                      double minMuxHeight = MAX(muxDecoder.height, mux.height);
+                      mux.CalculateArea(minMuxHeight, widthArray, OVERRIDE);
+                      subtractor.CalculateArea(NULL, widthArray, NONE);
+                      readCircuit.CalculateUnitArea();
+                      readCircuit.CalculateArea(mux.width);
+                      if (shiftAddEnable) {
+                          shiftAdd.CalculateArea(NULL, widthArray, NONE);
+                      }
+                                                           
+                      height = slSwitchMatrix.height + heightArray + mux.height  + readCircuit.height + shiftAdd.height + subtractor.height;
+                      width = MAX(wlBlSwitchMatrix.width, muxDecoder.width) + widthArray;
+                      area = height * width;
+                      usedArea = areaArray + slSwitchMatrix.area + wlBlSwitchMatrix.area + mux.area + muxDecoder.area + readCircuit.area + shiftAdd.area + subtractor.area;
+                      emptyArea = area - usedArea;
+                    }
+                    else{
+                        wlDecoder.CalculateArea(heightArray, NULL, NONE);
+                        colDecoder.CalculateArea(NULL, widthArray, NONE);
+                        colDecoderDriver.CalculateArea(NULL, widthArray, NONE);
+                          
+                        // Get Mux height, compare it with Mux decoder height, and select whichever is larger for Mux
+                        mux.CalculateArea(NULL, widthArray, NONE);
+                        muxDecoder.CalculateArea(NULL, NULL, NONE);
+                        double minMuxHeight = MAX(muxDecoder.height, mux.height);
+                        mux.CalculateArea(minMuxHeight, widthArray, OVERRIDE);
+      
+                        voltageSenseAmp.CalculateUnitArea();
+                        voltageSenseAmp.CalculateArea(mux.widthTgShared);
+                        adder.CalculateArea(NULL, widthArray, NONE);
+                        dff.CalculateArea(NULL, widthArray, NONE);
+                        subtractor.CalculateArea(NULL, widthArray, NONE);
+                        if (shiftAddEnable) {
+                            shiftAdd.CalculateArea(NULL, widthArray, NONE);
+                        }
+                        height = colDecoder.height + colDecoderDriver.height + heightArray + mux.height + voltageSenseAmp.height + adder.height + dff.height + shiftAdd.height + subtractor.height;
+                        width = MAX(wlDecoder.width, muxDecoder.width) + widthArray;
+                        area = height * width;
+                        usedArea = areaArray + wlDecoder.area + colDecoder.area + colDecoderDriver.area + mux.area + voltageSenseAmp.area + muxDecoder.area + adder.area + dff.area + shiftAdd.area + subtractor.area;
+                        emptyArea = area - usedArea;
                    }
-
 				} else {  //analog mode 1T1R RRAM
 					wlDecoder.CalculateArea(heightArray, NULL, NONE);
 					wlDecoderOutput.CalculateArea(heightArray, NULL, NONE);
@@ -437,7 +430,6 @@ void SubArray::CalculateArea() {  //calculate layout area for total design
 					usedArea = areaArray + wlDecoder.area + wlDecoderOutput.area + slSwitchMatrix.area + blSwitchMatrix.area + mux.area + readCircuit.area + voltageSenseAmp.area + muxDecoder.area + shiftAdd.area + subtractor.area;
 					emptyArea = area - usedArea;
 				}
-
 			} else {        // Cross-point
 				
 				// Array only
@@ -547,7 +539,6 @@ void SubArray::CalculateLatency(double _rampInput) {   //calculate latency for d
 
 	    } else if (cell.memCellType == Type::RRAM) {
 			if (cell.accessType == CMOS_access) {   // 1T1R
-				
 				if (digitalModeNeuro) { //1T1R for digital neuro
 					double capBL = lengthCol * 0.2e-15/1e-6;
 					wlDecoder.CalculateLatency(1e20, capRow2, NULL, numRow*activityRowRead*numReadPulse*numColMuxed, numRow*activityRowWrite);
@@ -563,6 +554,7 @@ void SubArray::CalculateLatency(double _rampInput) {   //calculate latency for d
 					double colRamp = 0;
 					double tau = resCol * capBL / 2 * (cell.resMemCellOff + resCol / 3) / (cell.resMemCellOff + resCol);
 					colDelay = horowitz(tau, 0, 1e20, &colRamp);	// Just to generate colRamp
+                    colDelay = tau * 0.2 * numColMuxed * numReadPulse;
 					
 					// Read
 					mux.CalculateLatency(colRamp, 0, 1);
@@ -586,6 +578,7 @@ void SubArray::CalculateLatency(double _rampInput) {   //calculate latency for d
 					readLatency += adder.readLatency;
 					readLatency += dff.readLatency;
 					readLatency += shiftAdd.readLatency;
+                    readLatency += colDelay;
 
 					// Write
 					writeLatency += MAX(wlDecoder.writeLatency, colDecoder.writeLatency + colDecoderDriver.writeLatency);
@@ -600,7 +593,7 @@ void SubArray::CalculateLatency(double _rampInput) {   //calculate latency for d
 					double colRamp = 0;
 					double tau = resCol * capCol / 2 * (cell.resMemCellOff + resCol / 3) / (cell.resMemCellOff + resCol);
 					colDelay = horowitz(tau, 0, blSwitchMatrix.rampOutput, &colRamp);	// Just to generate colRamp
-
+                    colDelay = tau * 0.2;
 					mux.CalculateLatency(colRamp, 0, 1);
 					int numInput = (int)ceil((double)numCol/numColMuxed);
 					muxDecoder.CalculateLatency(1e20, mux.capTgGateN*numInput, mux.capTgGateP*numInput, 1, 1);

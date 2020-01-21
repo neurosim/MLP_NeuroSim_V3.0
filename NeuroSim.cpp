@@ -109,7 +109,7 @@ void NeuroSimSubArrayInitialize(SubArray *& subArray, Array *array, InputParamet
 
 	}  
     else {	// eNVM (RRAM, PCM, STT-MRAM)
-        cell.memCellType = Type::RRAM; // Type if RRAM if it is not 2T1F cell
+        cell.memCellType = Type::RRAM; 
 		subArray->readCircuitMode  = CMOS;	// CMOS implementation for integrate-and-fire neuron
 		subArray->maxNumIntBit = param->numBitPartialSum;	// Max # bits for the integrate-and-fire neuron
 		
@@ -240,8 +240,11 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
                    
                     // only need the wl-bl decoder
                     double capBL = subArray->lengthCol * 0.2e-15 / 1e-6;
-                    subArray->colDelay = 2.3 * subArray->resCol * capBL; //column delay
-
+                    // subArray->colDelay = 2.3 * subArray->resCol * capBL; //column delay
+                    
+                    // Calculate column latency
+					double tau = subArray->capCol*(subArray->cell.resMemCellAvg/(subArray->numRow/2));
+					subArray->colDelay = tau * 0.2 * subArray->numReadPulse * subArray->numColMuxed;  // assume the 15~20% voltage drop is enough for sensing
  
                     // the read circuit
                     // The input capacitance of the read circuit
@@ -271,15 +274,17 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
                            subArray->subtractor.readLatency +
                            subArray->colDelay+ // need furthercheck
                            subArray->shiftAdd.readLatency;                
-                  }
-          else {
+                }
+                else {
                    double capBL = subArray->lengthCol * 0.2e-15 / 1e-6;
 				   subArray->wlDecoder.CalculateLatency(1e20, subArray->capRow2, NULL, subArray->numRow * subArray->numReadPulse * subArray->activityRowRead, 1);	// Don't care write
 				   double colRamp = 0;
-				   double tau = subArray->resCol * capBL / 2 * (subArray->cell.resMemCellOff + subArray->resCol / 3) / (subArray->cell.resMemCellOff + subArray->resCol);
-				   subArray->colDelay = horowitz(tau, 0, 1e20, &colRamp);
-				   subArray->colDelay = 2.3 * subArray->resCol * capBL;
-				   subArray->mux.CalculateLatency(colRamp, 0, 1);
+				   // double tau = subArray->resCol * capBL / 2 * (subArray->cell.resMemCellOff + subArray->resCol / 3) / (subArray->cell.resMemCellOff + subArray->resCol);
+				   // subArray->colDelay = horowitz(tau, 0, 1e20, &colRamp);
+				   // subArray->colDelay = 2.3 * subArray->resCol * capBL;
+				   double tau = subArray->resCol * subArray->capCol / 2 * (subArray->cell.resMemCellOff + subArray->resCol / 3) / (subArray->cell.resMemCellOff + subArray->resCol);
+                   subArray->colDelay = tau * 0.2 * subArray->numColMuxed * subArray->numRow * subArray->numReadPulse;                   
+                   subArray->mux.CalculateLatency(colRamp, 0, 1);
 				   // Here numColMuxed can mean how many synapses share 1 adder or how many columns share 1 S/A
 				   int numAdder = (int)ceil(((double)subArray->numCol / subArray->numCellPerSynapse) / subArray->numColMuxed);   // numCol is divisible by numCellPerSynapse
 				   int numInput = numAdder * subArray->numCellPerSynapse; // number of input of the mux
@@ -298,7 +303,7 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
 						subArray->adder.readLatency +
 						subArray->dff.readLatency +
 						subArray->subtractor.readLatency +
-                        // subArray->colDelay+
+                        subArray->colDelay+
 						subArray->shiftAdd.readLatency;
                 }
                         
@@ -307,10 +312,12 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
 				subArray->wlDecoder.CalculateLatency(1e20, wlDecoderLoad, NULL, subArray->numRow * subArray->activityRowRead * subArray->numReadPulse, 1);	// Don't care write
 				subArray->wlDecoderDriver.CalculateLatency(subArray->wlDecoder.rampOutput, subArray->capRow1, subArray->capRow1, subArray->resRow, subArray->numRow * subArray->activityRowRead * subArray->numReadPulse, 1);	// Don't care write
 				double colRamp = 0;
-				double tau = subArray->resCol * subArray->capCol / 2 * (subArray->cell.resMemCellOff + subArray->resCol / 3) / (subArray->cell.resMemCellOff + subArray->resCol);
-				subArray->colDelay = horowitz(tau, 0, 1e20, &colRamp);
-				subArray->colDelay = 2.3 * subArray->resCol * subArray->capCol;
-				subArray->mux.CalculateLatency(colRamp, 0, 1);
+				// double tau = subArray->resCol * subArray->capCol / 2 * (subArray->cell.resMemCellOff + subArray->resCol / 3) / (subArray->cell.resMemCellOff + subArray->resCol);
+				// subArray->colDelay = horowitz(tau, 0, 1e20, &colRamp);
+				// subArray->colDelay = 2.3 * subArray->resCol * subArray->capCol;
+				double tau = subArray->capCol*(subArray->cell.resMemCellAvg/(subArray->numRow/2));
+				subArray->colDelay = tau * 0.2 * subArray->numReadPulse * subArray->numColMuxed;
+                subArray->mux.CalculateLatency(colRamp, 0, 1);
 				// Here numColMuxed can mean how many synapses share 1 adder or how many columns share 1 S/A
 				int numAdder = (int)ceil(((double)subArray->numCol / subArray->numCellPerSynapse) / subArray->numColMuxed);   // numCol is divisible by numCellPerSynapse
 				int numInput = numAdder * subArray->numCellPerSynapse;
@@ -335,6 +342,8 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
 				subArray->wlDecoder.CalculateLatency(1e20, subArray->wlDecoderOutput.capNorInput, NULL, 1, 1);	// Don't care write
 				subArray->wlDecoderOutput.CalculateLatency(subArray->wlDecoder.rampOutput, subArray->capRow2, subArray->resRow, 1, 1);	// Don't care write
 				subArray->blSwitchMatrix.CalculateLatency(1e20, subArray->capRow1, subArray->resRow, subArray->numReadPulse, 1);    // Don't care write
+				double tau = subArray->capCol*(subArray->cell.resMemCellAvg/(subArray->numRow/2));
+				subArray->colDelay = tau * 0.2 * subArray->numReadPulse * subArray->numColMuxed;
 				if (subArray->readCircuit.mode == CMOS) {
                     // Cin is the capacitance to collect the charge
 					double Cin = subArray->capCol + subArray->mux.capTgDrain * (2 + subArray->numColMuxed - 1) + subArray->readCircuit.capTgDrain + subArray->readCircuit.capPmosGate;
@@ -357,7 +366,8 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
 						subArray->blSwitchMatrix.readLatency +
 						subArray->readCircuit.readLatency +
 						subArray->subtractor.readLatency +
-						subArray->shiftAdd.readLatency;
+						subArray->shiftAdd.readLatency + 
+                        subArray->colDelay;
 
 			} else {		// Cross-point
 				subArray->wlSwitchMatrix.CalculateLatency(1e20, subArray->capRow1, subArray->resRow, subArray->numReadPulse, 1);	// Don't care write
@@ -372,6 +382,9 @@ double NeuroSimSubArrayReadLatency(SubArray *subArray) {	// For 1 weighted sum t
 					double t_rise = -Rp * Cin * log((subArray->readCircuit.Vth - subArray->readCircuit.Vrow * Rp / Rmin) / (subArray->readCircuit.Vhold - subArray->readCircuit.Vrow * Rp / Rmin));
 					subArray->cell.readPulseWidth = t_rise * subArray->readCircuit.maxNumIntPerCycle;
 				}
+                // the column delay
+				double tau = subArray->capCol*(subArray->cell.resMemCellAvg/(subArray->numRow/2));
+				subArray->colDelay = tau * 0.2 * subArray->numReadPulse * subArray->numColMuxed;
 				subArray->readCircuit.CalculateLatency(subArray->numReadPulse);
 				subArray->subtractor.CalculateLatency(1e20, 0, subArray->numReadPulse);
 				if (subArray->shiftAddEnable) {
@@ -692,43 +705,11 @@ double NeuroSimSubArrayLeakagePower(SubArray *subArray) {
 		subArray->leakage += subArray->shiftAdd.leakage;
 
 	} 
-    else if(subArray->cell.memCellType==Type::_2T1F){
-             // leakage from the 2 access transistor??
-            subArray->wlSwitchMatrix.CalculatePower(1, 1);	// Don't care numRead and numWrite
-            subArray->blSwitchMatrix.CalculatePower(1, 1);	// Don't care numRead and numWrite
-            subArray->slSwitchMatrix.CalculatePower(1, 1);	// Don't care numRead and numWrite
-            subArray->plSwitchMatrix.CalculatePower(1, 1);	// Don't care numRead and numWrite
-            subArray->mux.CalculatePower(1);	// Don't care numRead
-            subArray->muxDecoder.CalculatePower(1, 1);	// Don't care numRead and numWrite
-            subArray->readCircuit.CalculatePower(1);	// Don't care numRead
-            subArray->subtractor.CalculatePower(1, 1);
-            if (subArray->shiftAddEnable) {
-                subArray->shiftAdd.CalculatePower(1);	// Don't care numRead
-            }
-		    // width of the PMOS is 0;
-            // leakage power of the two access transistor of the 3T1C cell
-            // should use the access transistor's width
-            subArray->leakage += CalculateGateLeakage(INV, 1, subArray->cell.widthAccessNMOS * subArray->tech.featureSize, subArray->cell.widthAccessPMOS * subArray->tech.featureSize , subArray->inputParameter.temperature, subArray->tech) * subArray->tech.vdd * 2;
-		    subArray->leakage *= subArray->numRow * subArray->numCol;            
-            subArray->leakage += subArray->wlSwitchMatrix.leakage;
-            subArray->leakage += subArray->blSwitchMatrix.leakage;
-            subArray->leakage += subArray->slSwitchMatrix.leakage;
-            subArray->leakage += subArray->plSwitchMatrix.leakage;
-            subArray->leakage += subArray->mux.leakage;
-            subArray->leakage += subArray->muxDecoder.leakage;
-            subArray->leakage += subArray->readCircuit.leakage;
-            subArray->leakage += subArray->subtractor.leakage;
-            subArray->leakage += subArray->shiftAdd.leakage;       
-    }
     else {	// eNVM
 		if (subArray->digitalModeNeuro) {   // Digital eNVM
 			if (subArray->cell.accessType == CMOS_access) {   // 1T1R
                 if (subArray->parallelRead==true)
-                {
-				    /*subArray->wlDecoder.CalculatePower(1, 1);
-                    subArray->wlDecoderOutput.CalculatePower(1,1);
-                    subArray->blSwitchMatrix.CalculatePower(1, 1);	// Don't care numRead and numWrite */
-                    
+                {                    
                     subArray->wlBlSwitchMatrix.CalculatePower(1, 1);
                     subArray->slSwitchMatrix.CalculatePower(1, 1);
 				    subArray->mux.CalculatePower(1);
@@ -738,11 +719,6 @@ double NeuroSimSubArrayLeakagePower(SubArray *subArray) {
 				    if (subArray->shiftAddEnable) {
 					    subArray->shiftAdd.CalculatePower(1);
 				     }
-				    /*
-                    subArray->leakage += subArray->wlDecoder.leakage;
-				    subArray->leakage += subArray->wlDecoderOutput.leakage;
-                    subArray->leakage += subArray->blSwitchMatrix.leakage; 
-                     */
                     subArray->leakage += subArray->wlBlSwitchMatrix.leakage;
                     subArray->leakage += subArray->mux.leakage;
 				    subArray->leakage += subArray->muxDecoder.leakage;

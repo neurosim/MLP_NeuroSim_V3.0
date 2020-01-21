@@ -43,6 +43,9 @@
 #include <iostream>
 #include "constant.h"
 #include "formula.h"
+#include "../Param.h"
+
+extern Param* param;
 
 using namespace std;
 
@@ -66,7 +69,7 @@ double CalculateGateArea(	// Calculate layout area and width of logic gate given
 	double heightRegionP, heightRegionN;
 	int numFoldedPMOS = 1, numFoldedNMOS = 1;
 
-	if (tech.featureSize >= 22 * 1e-9) {	// Bulk 
+	if (param->processNode >= 22) {	// Bulk 
 		if (ratio == 0) {	/* no PMOS */
 			maxWidthPMOS = 0;
 			maxWidthNMOS = heightTransistorRegion - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
@@ -200,7 +203,7 @@ void CalculateGateCapacitance(
 	double heightDrainP = 0, heightDrainN = 0;
 	int numFoldedPMOS = 1, numFoldedNMOS = 1;
 	double widthDrainSidewallP = 0, widthDrainSidewallN = 0;
-	if (tech.featureSize >= 22 * 1e-9) { // Bulk
+	if (param->processNode >= 22) { // Bulk
 		if (ratio == 0) {	/* no PMOS */
 			maxWidthPMOS = 0;
 			maxWidthNMOS = heightTransistorRegion - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
@@ -471,7 +474,7 @@ double CalculatePassGateArea(	// Calculate layout area, height and width of pass
 	
 	*width = (numFold + 1) * (POLY_WIDTH + MIN_GAP_BET_GATE_POLY) * tech.featureSize;	// No folding means numFold=1
 
-	if (tech.featureSize >= 22 * 1e-9) {	// Bulk
+	if (param->processNode >= 22) {	// Bulk
 		*height = widthPMOS/numFold + widthNMOS/numFold + MIN_GAP_BET_P_AND_N_DIFFS * tech.featureSize 
 				+ (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
 	} else {	// FinFET
