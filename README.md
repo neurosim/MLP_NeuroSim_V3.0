@@ -39,6 +39,10 @@ make
 
 For the usage of this tool, please refer to the manual.
 
+Updates on Jan. 20th, 2020: 
+1. In sub-array, use linear-region transistor in MUX, Switch Matrix and across-transistor in array.
+2. Calibrate FinFET technology library (<20nm)
+
 ## References related to this tool
 1. P.-Y. Chen, S. Yu, "Technological benchmark of analog synaptic devices for neuro-inspired architectures," IEEE Design & Test, 2019.
 2. P.-Y. Chen, X. Peng, S. Yu, “NeuroSim: A circuit-level macro model for benchmarking neuro-inspired architectures in online learning,” IEEE Trans. CAD,vol. 37, no. 12, pp. 3067-3080, 2018.
