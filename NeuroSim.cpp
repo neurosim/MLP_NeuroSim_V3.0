@@ -820,7 +820,7 @@ double NeuroSimSubArrayLeakagePower(SubArray *subArray) {
 			}
 		}
 	}
-	return;
+	return subArray->leakage;
 }
 
 // Neuron refers to the periphery circuit
