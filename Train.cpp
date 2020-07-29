@@ -212,7 +212,7 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
                                         Dsum += outputDigits*(int) pow(2,w);  // get the weight represented by the column
                                         DsumMax += param->nInput*(int) pow(2,w); // the maximum weight that can be represented by this column
                                     }
-                                    sumArrayReadEnergy += static_cast<DigitalNVM*>(arrayHO->cell[0][0])->readEnergy * arrayHO->numCellPerSynapse * arrayHO->arrayRowSize;
+                                    sumArrayReadEnergy += static_cast<DigitalNVM*>(arrayIH->cell[0][0])->readEnergy * arrayIH->numCellPerSynapse * arrayIH->arrayRowSize;
                                     outN1[j] += (double)(Dsum - Dref*(pow(2,param->numWeightBit-1)-1)) / DsumMax * pSumMaxAlgorithm;
                             }
                             else
