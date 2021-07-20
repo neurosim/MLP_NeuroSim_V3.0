@@ -133,12 +133,12 @@ public:
 	virtual double Read(double voltage) = 0;
 	virtual void Write(double deltaWeightNormalized, double weight, double minWeight, double maxWeight) = 0;
 	double GetMaxReadCurrent(){
-      if(cmosAccess)
+      if(cmosAccess && !FeFET)
           return readVoltage * 1/(1/avgMaxConductance+resistanceAccess);
       else 
           return readVoltage * avgMaxConductance;}
 	double GetMinReadCurrent(){
-      if(cmosAccess)
+      if(cmosAccess && ! FeFET)
           return readVoltage * 1/(1/avgMinConductance+resistanceAccess);
       else
           return readVoltage * avgMinConductance;}
