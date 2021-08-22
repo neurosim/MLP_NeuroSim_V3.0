@@ -54,7 +54,8 @@
 #include "Test.h"
 #include "Mapping.h"
 #include "Definition.h"
-
+#include "omp.h"
+ 
 using namespace std;
 
 int main() {
@@ -66,10 +67,12 @@ int main() {
 
 	/* Initialization of synaptic array from input to hidden layer */
 	//arrayIH->Initialization<IdealDevice>();
-	arrayIH->Initialization<RealDevice>();
+	arrayIH->Initialization<RealDevice>(); 
 	//arrayIH->Initialization<MeasuredDevice>();
 	//arrayIH->Initialization<SRAM>(param->numWeightBit);
-	//arrayIH->Initialization<DigitalNVM>(param->numWeightBit,true); // true: consider refColumn
+	//arrayIH->Initialization<DigitalNVM>(param->numWeightBit,true);
+	//arrayIH->Initialization<HybridCell>(); // the 3T1C+2PCM cell
+	//arrayIH->Initialization<_2T1F>();
 
 	
 	/* Initialization of synaptic array from hidden to output layer */
@@ -78,8 +81,10 @@ int main() {
 	//arrayHO->Initialization<MeasuredDevice>();
 	//arrayHO->Initialization<SRAM>(param->numWeightBit);
 	//arrayHO->Initialization<DigitalNVM>(param->numWeightBit,true);
+	//arrayHO->Initialization<HybridCell>(); // the 3T1C+2PCM cell
+	//arrayHO->Initialization<_2T1F>();
 
-
+    omp_set_num_threads(16);
 	/* Initialization of NeuroSim synaptic cores */
 	param->relaxArrayCellWidth = 0;
 	NeuroSimSubArrayInitialize(subArrayIH, arrayIH, inputParameterIH, techIH, cellIH);
@@ -123,26 +128,42 @@ int main() {
 	
 	/* Initialize weights and map weights to conductances for hardware implementation */
 	WeightInitialize();
-	if (param->useHardwareInTraining) { WeightToConductance(); }
-
+	if (param->useHardwareInTraining)
+    	WeightToConductance();
 	srand(0);	// Pseudorandom number seed
 	
 	ofstream mywriteoutfile;
-	mywriteoutfile.open("my_log.csv");                                                                                                            
-	
-	for (int i=1; i<=param->totalNumEpochs/param->interNumEpochs; i++) {
-        //cout << "Training Epoch : " << i << endl;
+	mywriteoutfile.open("output.csv");                                                                                                            
+	for (int i=1; i<=param->totalNumEpochs/param->interNumEpochs; i++){
 		Train(param->numTrainImagesPerEpoch, param->interNumEpochs,param->optimization_type);
 		if (!param->useHardwareInTraining && param->useHardwareInTestingFF) { WeightToConductance(); }
 		Validate();
+        if (HybridCell *temp = dynamic_cast<HybridCell*>(arrayIH->cell[0][0]))
+            WeightTransfer();
+        else if(_2T1F *temp = dynamic_cast<_2T1F*>(arrayIH->cell[0][0]))
+            WeightTransfer_2T1F();
+                
 		mywriteoutfile << i*param->interNumEpochs << ", " << (double)correct/param->numMnistTestImages*100 << endl;
 		
 		printf("Accuracy at %d epochs is : %.2f%\n", i*param->interNumEpochs, (double)correct/param->numMnistTestImages*100);
+		/* Here the performance metrics of subArray also includes that of neuron peripheries (see Train.cpp and Test.cpp) */
 		printf("\tRead latency=%.4e s\n", subArrayIH->readLatency + subArrayHO->readLatency);
 		printf("\tWrite latency=%.4e s\n", subArrayIH->writeLatency + subArrayHO->writeLatency);
 		printf("\tRead energy=%.4e J\n", arrayIH->readEnergy + subArrayIH->readDynamicEnergy + arrayHO->readEnergy + subArrayHO->readDynamicEnergy);
 		printf("\tWrite energy=%.4e J\n", arrayIH->writeEnergy + subArrayIH->writeDynamicEnergy + arrayHO->writeEnergy + subArrayHO->writeDynamicEnergy);
+		if(HybridCell* temp = dynamic_cast<HybridCell*>(arrayIH->cell[0][0])){
+            printf("\tTransfer latency=%.4e s\n", subArrayIH->transferLatency + subArrayHO->transferLatency);
+            printf("\tTransfer latency=%.4e s\n", subArrayIH->transferLatency);	
+            printf("\tTransfer energy=%.4e J\n", arrayIH->transferEnergy + subArrayIH->transferDynamicEnergy + arrayHO->transferEnergy + subArrayHO->transferDynamicEnergy);
+        }
+        else if(_2T1F* temp = dynamic_cast<_2T1F*>(arrayIH->cell[0][0])){
+            printf("\tTransfer latency=%.4e s\n", subArrayIH->transferLatency);	
+            printf("\tTransfer energy=%.4e J\n", arrayIH->transferEnergy + subArrayIH->transferDynamicEnergy + arrayHO->transferEnergy + subArrayHO->transferDynamicEnergy);
+         }
+        // printf("\tThe total weight update = %.4e\n", totalWeightUpdate);
+        // printf("\tThe total pulse number = %.4e\n", totalNumPulse);
 	}
+	// print the summary: 
 	printf("\n");
 	return 0;
 }

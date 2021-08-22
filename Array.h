@@ -83,7 +83,7 @@ public:
 
 		/* Initialize memory cells */
         int cellsPerRow; // the number of columns 
-        if(refColumn == true) 
+        if(refColumn = true) 
             cellsPerRow = arrayColSize*numCellPerSynapse+2;
         else
             cellsPerRow = arrayColSize*numCellPerSynapse;
@@ -95,7 +95,7 @@ public:
 			}
 		}
         // initialize the conductance of the reference column
-        if(refColumn == true)
+        if(refColumn = true)
         {
             refColumnNumber = arrayColSize*numCellPerSynapse; // the column number of the first reference column
             if(DigitalNVM *temp = dynamic_cast<DigitalNVM*>(this->cell[0][0]))

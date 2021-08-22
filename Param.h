@@ -51,6 +51,7 @@ public:
 	
 	/* Algorithm parameters */
 	int numTrainImagesPerEpoch;	// # of training images per epoch
+    int numTrainImagesPerBatch;
 	int totalNumEpochs;	// Total number of epochs
 	int interNumEpochs;	// Internal number of epochs (print out the results every interNumEpochs)
 	int nInput;     // # of neurons in input layer

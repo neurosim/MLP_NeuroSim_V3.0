@@ -148,7 +148,10 @@ void PrintWeightToFile(const char *str) {
 	fprintf(fp_dw1, "minWeight=%f, maxWeight=%f\n", param->minWeight, param->maxWeight);
 	for (int j = 0; j < param->nHide; j++){
 		for (int k = 0; k < param->nInput; k++){
+      // for (int m=0;m<param->numWeightBit;m++){
 			    fprintf(fp_dw1, "%f,", weight1[j][k]);
+			    //fprintf(fp_dw1, "%.4e,", static_cast<DigitalNVM*>(arrayIH->cell[j+m][k])->maxConductance);
+		   //}
     }
 		fprintf(fp_dw1, "\n");
 	}
@@ -160,7 +163,10 @@ void PrintWeightToFile(const char *str) {
 	fprintf(fp_dw2, "minWeight=%f, maxWeight=%f\n", param->minWeight, param->maxWeight);
 	for (int j = 0; j < param->nOutput; j++){
 		for (int k = 0; k < param->nHide; k++){
+      //for (int m=0;m<param->numWeightBit;m++){
 			fprintf(fp_dw2, "%f,", weight2[j][k]);
+			//  fprintf(fp_dw1, "%.4e,", static_cast<DigitalNVM*>(arrayHO->cell[j+m][k])->conductance);
+		  //}
     }
 		fprintf(fp_dw2, "\n");
 	}

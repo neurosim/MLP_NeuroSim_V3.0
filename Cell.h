@@ -107,6 +107,7 @@ public:
 	double writeEnergySRAMCell;	// Write energy (J) per SRAM cell (will be obtained from NeuroSim)
 	double Read(){}	// Currently not used
 	void Write(){}	// Currently not used
+	bool parallelRead;  // parallel read or not
 };
 
 class AnalogNVM: public eNVM {
@@ -138,7 +139,7 @@ public:
       else 
           return readVoltage * avgMaxConductance;}
 	double GetMinReadCurrent(){
-      if(cmosAccess && ! FeFET)
+      if(cmosAccess && !FeFET)
           return readVoltage * 1/(1/avgMinConductance+resistanceAccess);
       else
           return readVoltage * avgMinConductance;}
@@ -194,6 +195,181 @@ public:
 	MeasuredDevice(int x, int y);
 	double Read(double voltage);	// Return read current (A)
 	void Write(double deltaWeightNormalized, double weight, double minWeight, double maxWeight);
+};
+
+// code added
+class _3T1C : public Cell {
+   public:
+	double readVoltage;	    // On-chip read voltage (Vr) (V) for the LSB capacitor 
+	double readPulseWidth;	// Read pulse width for the LSB capacitor (s) (will be determined by ADC)
+	double readEnergy;	        // Dynamic variable for calculation of read energy (J)
+	
+    /* the write voltage and write current depends on the access transistor
+        make sure they are consistent with each other*/
+    double writeVoltageLTP;	 // Write voltage (V) for LTP or weight increase
+	double writeVoltageLTD;	 // Write voltage (V) for LTD or weight decrease
+    double writeCurrentLTP;  // Write current (A) for LTP or weight increase
+    double writeCurrentLTD; // Write current (A) for LTP or weight increase
+
+	double writePulseWidthLTP;	// Write pulse width (s) of LTP or weight increase
+	double writePulseWidthLTD;	// Write pulse width (s) of LTD or weight decrease
+	double writeEnergy;	            // Dynamic variable for calculation of write energy (J)
+    double writeLatencyLTP;	// Write latency of a cell during LTP or weight increase (different cells use different # write pulses, thus latency values are different). writeLatency will be calculated for each cell first, and then replaced by the maximum one in the batch write.
+	double writeLatencyLTD;	// Write latency of a cell during LTD or weight decrease (different cells use different # write pulses, thus latency values are different). writeLatency will be calculated for each cell first, and then replaced by the maximum one in the batch write
+    double writeVoltageSquareSum;   // Sum of V^2 of non-identical pulses (for weight update energy calculation in subcircuits)
+
+    double capacitance;                // the capacitance at the storage node. Use it to determine the voltage
+    double chargeStorage=0;         // the charge stored at the capatitance;
+    double chargeStoragePrev=0;
+    double maxCharge = writeCurrentLTP*writePulseWidthLTP*maxNumLevelLTP;
+    double voltageStorage = chargeStorage/capacitance; // the voltage at the storage node
+	double conductance;	            // Current channel conductance (S) of the Transistor
+	double conductancePrev;	    // Previous channel conductance (S) of the Transistor
+	double conductanceRef;         // the conductance from the reference cell, which is (Gmax+Gmin)/2
+    double currentRef;
+    double maxConductance;	    // Maximum cell conductance (S)
+	double minConductance;	    // Minimum cell conductance (S)
+    int maxNumLevelLTP;	            // Maximum number of conductance states during LTP or weight increase
+	int maxNumLevelLTD;	  
+          // Maximum number of conductance states during LTD or weight decrease
+	double xPulse;
+    int numPulse;   // Number of write pulses used in the most recent write operation (Positive number: LTP, Negative number: LTD) (dynamic variable)
+	double NL_LTP;		// LTP nonlinearity
+	double NL_LTD;		// LTD nonlinearity
+	double paramALTP;	// Parameter A for LTP nonlinearity
+	double paramBLTP;	// Parameter B for LTP nonlinearity
+	double paramALTD;	// Parameter A for LTD nonlinearity
+	double paramBLTD;	// Parameter B for LTD nonlinearity
+	double sigmaDtoD;	// Sigma of device-to-device variation on weight update nonliearity baseline
+	double sigmaCtoC;	// Sigma of cycle-to-cycle variation on weight update
+	
+    bool nonlinearWrite;	// Consider weight update nonlinearity or not
+    
+	bool cmosAccess;	// Always true for the 2T1C cell
+    double resistanceAccess;	// The resistance of two access transistors
+    double widthAccessNMOS;
+    double widthAccessPMOS;
+    double widthAccessTransistor; // for the PCM
+ 
+
+    /* device non-ideal effect */
+    bool readNoise;	// Consider read noise or not
+    double sigmaReadNoise;	// Sigma of read noise in gaussian distribution
+	std::normal_distribution<double> *gaussian_dist;	// Normal distribution object
+	std::normal_distribution<double> *gaussian_dist2;	// Normal distribution object
+	std::normal_distribution<double> *gaussian_dist3;	// Normal distribution object
+	std::normal_distribution<double> *gaussian_dist4;	// Normal distribution object
+	std::normal_distribution<double> *gaussian_dist5;	// Normal distribution object
+	std::normal_distribution<double> *gaussian_dist_maxConductance;	// Normal distribution object
+	std::normal_distribution<double> *gaussian_dist_minConductance;	// Normal distribution object
+	bool conductanceRangeVar;	// Consider variation of conductance range or not
+	double maxConductanceVar;	// Sigma of maxConductance variation (S)
+	double minConductanceVar;	// Sigma of minConductance variation (S)
+    
+    _3T1C(int x, int y);
+	double Read(double voltage) ;
+	void Write(double deltaWeightNormalized, double weight, double minWeight, double maxWeight);
+	double GetMaxReadCurrent(void);
+	double GetMinReadCurrent(void);
+
+	void WriteEnergyCalculation(double wireCapCol);    
+};
+
+
+class HybridCell : public Cell {
+public:
+  // for the 3T1C+2PCM cell 
+  _3T1C LSBcell;
+  RealDevice MSBcell_LTP;
+  RealDevice MSBcell_LTD;
+  
+  //for the 2T1FeFET cell
+  //_3T1C LSBcell; // the LSBcell is the channel conductance of the FeFET
+  //FeFET_MSB MSBcell_LTP; // the MSBcell is reflect the modulation of the 
+  //FeFET_MSB MSBcell_LTD;  
+    /* The MSB cell and LSB cell should use the same current */
+  int significance; // the significance of the MSB cell
+  double conductance;	                // total conductance of the hybrid cell
+  double conductancePrev=0;	    // total conductance of the hybrid cell
+  double readEnergy=0;	            // Dynamic variable for calculation of read energy (J)
+  double writeEnergy=0;	            // Dynamic variable for calculation of write energy (J)
+  double transferReadEnergy=0;
+  double transferWriteEnergy=0;
+  double transferEnergy=0;
+  bool Analog;  // To Do analog read out or digital read
+                // the analog read out is for FeFET hybrid precision cell
+  bool Digital; 
+  HybridCell(int x, int y);
+  double ReadCell(void) ;
+  double ReadMSB(void);
+  void Write(double deltaWeightNormalized, double weight, double minWeight, double maxWeight) ;
+  void WriteEnergyCalculation(double wireCapCol); 
+  void WeightTransfer(double weightMSB_LTP, double weightMSB_LTD, double minWeight, double maxWeight, double wireCapCol);
+};
+
+class _2T1F : public AnalogNVM{
+  public:
+    double maxConductanceLSB;  // the conductance for the LSB part of the weight
+    double minConductanceLSB;
+    double maxConductanceMSB; // the conductance for the MSB part of the weight; need to calculate based on the cell conductance
+    double minConductanceMSB;
+    double conductanceLSB;   // only record the volatile and nonvolatile conductance. No other use
+    double conductanceMSB; // for read/write, still use "conductance" 
+    
+    int maxNumLevelLTP_LSB; // the number of bits in the LSB cell
+    int maxNumLevelLTD_LSB;
+    int maxNumLevelLTP_MSB; // the number of bits in the MSB cell
+    int maxNumLevelLTD_MSB;
+    int prevMSBLevel=0; // Did not program the MSB cell at the initial state;
+    int nowMSBLevel=0;
+    bool transLTP = false; // if the cell is programmed to a higher MSB level;
+    bool transLTD = false; // if the cell is programmed to a lower MSB level;
+    
+    
+    double capacitance;                // the capacitance at the storage node. Use it to determine the voltage
+    double chargeStorage=0;         // the charge stored at the capatitance;
+    double chargeStoragePrev=0;
+    double maxCharge = writeCurrentLTP*writePulseWidthLTP*maxNumLevelLTP;
+    double writeCurrentLTP;  // Write current (A) for LTP or weight increase
+    double writeCurrentLTD; // Write current (A) for LTP or weight increase
+    
+    double transVoltage[4] = {2,2.67,3.33,4}; // program voltage for the LTP
+    double eraseVoltage;
+    double transPulseWidth;
+    double transEnergy=0;
+    double transLatency=0;
+    double eraseEnergy[4] = {4.072e-12,5.528e-12,6.837e-12,8.146e-12}; // store the energy consumption to erase/programm the MSB cell for each state;
+    double programEnergy[4] = {2.036e-12,3.69e-12,5.692e-12,8.146e-12}; 
+    
+    double gateCapFeFET;	// Gate Capacitance of FeFET (F) use this to modulate the LSB conductance
+    double widthAccessNMOS; 
+    double widthAccessPMOS; 
+    double widthFeFET;
+    
+    double NL_LTP;		// LTP nonlinearity
+	  double NL_LTD;		// LTD nonlinearity
+  	double paramALTP;	// Parameter A for LTP nonlinearity
+  	double paramBLTP;	// Parameter B for LTP nonlinearity
+  	double paramALTD;	// Parameter A for LTD nonlinearity
+  	double paramBLTD;	// Parameter B for LTD nonlinearity
+  	double sigmaDtoD;	// Sigma of device-to-device variation on weight update nonliearity baseline
+  	double sigmaCtoC;	// Sigma of cycle-to-cycle variation on weight update
+    double xPulse;
+    //double numPulse;
+    bool nonlinearWrite; 
+    
+    double transWriteEnergy=0; // the energy consumption when transfering the weight to MSB cell
+                                                // calculated during the weight transfer;
+ 
+    _2T1F(int x, int y);
+  	double GetMaxReadCurrent() {return readVoltage * maxConductance;}
+  	double GetMinReadCurrent() {return readVoltage * minConductance;}
+  	double Read(double voltage) ;
+  	void Write(double deltaWeightNormalized, double weight, double minWeight, double maxWeight);
+    void WriteEnergyCalculation(double wireCapCol);
+   // void WeightTransfer(double newConductance, char* mode);
+    void WeightTransfer(void);
+    
 };
 
 #endif

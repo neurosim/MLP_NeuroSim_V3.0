@@ -102,6 +102,16 @@ void Validate() {
         readPulseWidthIH = static_cast<eNVM*>(arrayIH->cell[0][0])->readPulseWidth;
 	    readPulseWidthHO = static_cast<eNVM*>(arrayHO->cell[0][0])->readPulseWidth;
     }
+    else if(HybridCell* temp = dynamic_cast<HybridCell*>(arrayIH->cell[0][0]))
+    {         
+         readVoltageIH = static_cast<HybridCell*>(arrayIH->cell[0][0])->LSBcell.readVoltage;
+        readVoltageHO = static_cast<HybridCell*>(arrayHO->cell[0][0])->LSBcell.readVoltage;
+        readVoltageMSB = static_cast<HybridCell*>(arrayIH->cell[0][0])->MSBcell_LTP.readVoltage;
+        readPulseWidthIH = static_cast<HybridCell*>(arrayIH->cell[0][0])->LSBcell.readPulseWidth;
+	    readPulseWidthHO = static_cast<HybridCell*>(arrayHO->cell[0][0])->LSBcell.readPulseWidth; 
+	    readPulseWidthMSB = static_cast<HybridCell*>(arrayHO->cell[0][0])->MSBcell_LTP.readPulseWidth;       
+
+    }
     
     #pragma omp parallel for private(outN1, a1, da1, outN2, a2, tempMax, countNum, numBatchReadSynapse) reduction(+: correct, sumArrayReadEnergyIH, sumNeuroSimReadEnergyIH, sumArrayReadEnergyHO, sumNeuroSimReadEnergyHO, sumReadLatencyIH, sumReadLatencyHO)
 	for (int i = 0; i < param->numMnistTestImages; i++)
@@ -122,7 +132,8 @@ void Validate() {
 					} else {    // Cross-point
 						sumArrayReadEnergyIH += arrayIH->wireCapRow * techIH.vdd * techIH.vdd * (param->nInput - 1);    // Unselected WLs
 					}
-				}
+				}else if (HybridCell *temp = dynamic_cast<HybridCell*>(arrayIH->cell[0][0]))  // 3T1C cell
+						sumArrayReadEnergyIH += arrayIH->wireGateCapRow * techIH.vdd * techIH.vdd * param->nInput; // All WLs open
 				
                 for (int n=0; n<param->numBitInput; n++) {
 					double pSumMaxAlgorithm = pow(2, n) / (param->numInputLevel - 1) * arrayIH->arrayRowSize;   // Max algorithm partial weighted sum for the nth vector bit (if both max input value and max weight are 1)
@@ -141,9 +152,43 @@ void Validate() {
 							IsumMin += arrayIH->GetMinCellReadCurrent(j,k);
 						}
 						sumArrayReadEnergyIH += Isum * readVoltageIH * readPulseWidthIH;
-						int outputDigits = 2*(CurrentToDigits(Isum, IsumMax-IsumMin)-CurrentToDigits(inputSum, IsumMax-IsumMin));
+						int outputDigits = (CurrentToDigits(Isum, IsumMax-IsumMin)-CurrentToDigits(inputSum, IsumMax-IsumMin));
+                        //int outputDigits = (CurrentToDigits(Isum, IsumMax)-CurrentToDigits(inputSum, IsumMax));
 						outN1[j] += DigitsToAlgorithm(outputDigits, pSumMaxAlgorithm);
 					} 
+                    else if(HybridCell* temp = dynamic_cast<HybridCell*>(arrayIH->cell[0][0]))
+                    {
+                        double Isum_LSB = 0;              // weighted sum current of the LTP cell
+                        double Isum_MSB_LTP = 0;    // weighted sum current of the LTP cell
+                        double Isum_MSB_LTD = 0;    // weighted sum current of the LTP cell
+                        double IsumMax_LSB = 0;            //the maximum weight sum current (all cells are at high conductance)
+                        double IsumMin_LSB = 0;
+                        double IsumMax_MSB = 0;
+                        double IsumMin_MSB = 0;                        
+                        double inputSum_LSB= 0;      // Reference for LSB cell
+                        for (int k=0; k<param->nInput; k++) {
+							if ((dTestInput[i][k]>>n) & 1) {    // if the nth bit of dTestInput[i][k] is 1
+								Isum_LSB += arrayIH->ReadCell(j,k,"LSB");
+                                Isum_MSB_LTP += arrayIH->ReadCell(j,k,"MSB_LTP");  
+                                Isum_MSB_LTD += arrayIH->ReadCell(j,k,"MSB_LTD");  
+								inputSum_LSB += arrayIH->GetMediumCellReadCurrent(j,k);
+                                sumArrayReadEnergyIH += arrayIH->wireCapRow * readVoltageIH * readVoltageIH;   // Selected BLs (1T1R) or Selected WLs (cross-point)
+                                sumArrayReadEnergyIH += 2*arrayIH->wireCapRow * readVoltageMSB * readVoltageMSB; // Selected BLs (1T1R) or Selected WLs (cross-point)
+							}
+							IsumMax_LSB += arrayIH->GetMaxCellReadCurrent(j,k,"LSB");
+                         	IsumMin_LSB += arrayIH->GetMinCellReadCurrent(j,k,"LSB");
+                            IsumMax_MSB += arrayIH->GetMaxCellReadCurrent(j,k,"MSB");
+                            IsumMin_MSB += arrayIH->GetMinCellReadCurrent(j,k,"MSB");
+						}
+                        sumArrayReadEnergyIH += Isum_LSB * readVoltageIH * readPulseWidthIH;
+                        sumArrayReadEnergyIH += (Isum_MSB_LTP + Isum_MSB_LTD) * readVoltageMSB * readPulseWidthMSB;
+                        int outputDigits;
+                        int outputDigitsLSB = 2*(CurrentToDigits(Isum_LSB, IsumMax_LSB-IsumMin_LSB)-CurrentToDigits(inputSum_LSB, IsumMax_LSB-IsumMin_LSB)); //minus the reference
+                        //int outputDigitsLSB = CurrentToDigits(Isum_LSB, IsumMax_LSB-IsumMin_LSB)-CurrentToDigits(inputSum_LSB, IsumMax_LSB-IsumMin_LSB); //minus the reference
+                        int outputDigitsMSB = CurrentToDigits(Isum_MSB_LTP, IsumMax_MSB-IsumMin_MSB)-CurrentToDigits(Isum_MSB_LTD, IsumMax_MSB-IsumMin_MSB); //minus the reference
+                        outputDigits = static_cast<HybridCell*>(arrayIH->cell[0][0])->significance*outputDigitsMSB+outputDigitsLSB;
+                        outN1[j] += DigitsToAlgorithm(outputDigits/3, pSumMaxAlgorithm)/(static_cast<HybridCell*>(arrayIH->cell[0][0])->significance+1);;   
+                    }
                     else {
                             bool digitalNVM = false; 
                             bool parallelRead = false;
@@ -170,11 +215,22 @@ void Validate() {
                                         {
 										    if((dTestInput[i][k]>>n) & 1){ // accumulate the current along a column
 											    Isum += static_cast<DigitalNVM*>(arrayIH->cell[colIndex ][k])->conductance*static_cast<DigitalNVM*>(arrayIH->cell[colIndex ][k])->readVoltage;
+											    //inputSum += Imin;
                                                 inputSum += static_cast<DigitalNVM*>(arrayIH->cell[arrayIH->refColumnNumber][k])->conductance*static_cast<DigitalNVM*>(arrayIH->cell[arrayIH->refColumnNumber][k])->readVoltage;
 										    }
 									    }
+                                       /* int outputDigits = (Isum - inputSum)/(Imax-Imin); // the output at the ADC of this column
+                                                                                                               // basically, this is the number of "1" in this column
+                                        if(outputDigits > param->pSumMaxHardware)
+                                            outputDigits = param->pSumMaxHardware; */
                                         int outputDigits = (int) (Isum /(Imax-Imin)); // the output at the ADC of this column
+                                                                                                               // basically, this is the number of "1" in this column
                                         int outputDigitsRef = (int) (inputSum/(Imax-Imin));
+                                    
+                                        if(outputDigits > param->pSumMaxHardware)
+                                            outputDigits = param->pSumMaxHardware;
+                                        if(outputDigitsRef > param->pSumMaxHardware)
+                                            outputDigitsRef = param->pSumMaxHardware;
                                         outputDigits = outputDigits-outputDigitsRef;
                                             
                                         Dref = (int)(inputSum/Imin);
@@ -210,6 +266,7 @@ void Validate() {
                     }
                 }
 				a1[j] = sigmoid(outN1[j]);
+				//da1[j] = round(a1[j] * (param->numInputLevel - 1));
 				da1[j] = round_th(a1[j]*(param->numInputLevel-1), param->Hthreshold);
 			}
 
@@ -264,7 +321,7 @@ void Validate() {
 					if (AnalogNVM *temp = dynamic_cast<AnalogNVM*>(arrayHO->cell[0][0])) {  // Analog NVM
 						double Isum = 0;    // weighted sum current
 						double IsumMax = 0; // Max weighted sum current
-            double IsumMin = 0;
+                        double IsumMin = 0;
 						double a1Sum = 0;   // Weighted sum current of a1 vector * weight=1 column
 						for (int k=0; k<param->nHide; k++) {
 							if ((da1[k]>>n) & 1) {    // if the nth bit of da1[k] is 1
@@ -273,12 +330,45 @@ void Validate() {
 								sumArrayReadEnergyHO += arrayHO->wireCapRow * readVoltageHO * readVoltageHO;  
 							}
 							IsumMax += arrayHO->GetMaxCellReadCurrent(j,k);
-              IsumMin += arrayHO->GetMinCellReadCurrent(j,k);
+                            IsumMin += arrayHO->GetMinCellReadCurrent(j,k);
 						}
 						sumArrayReadEnergyHO += Isum * readVoltageHO * readPulseWidthHO;
-						int outputDigits = 2*(CurrentToDigits(Isum, IsumMax-IsumMin)-CurrentToDigits(a1Sum, IsumMax-IsumMin));
+						int outputDigits = (CurrentToDigits(Isum, IsumMax-IsumMin)-CurrentToDigits(a1Sum, IsumMax-IsumMin));
+						//int outputDigits = (CurrentToDigits(Isum, IsumMax)-CurrentToDigits(a1Sum, IsumMax));
 						outN2[j] += DigitsToAlgorithm(outputDigits, pSumMaxAlgorithm);
                         
+					} else if	(HybridCell *temp = dynamic_cast<HybridCell*>(arrayHO->cell[0][0])) {  //3T1C
+                       
+                        double Isum_LSB = 0;              // weighted sum current of the LTP cell
+                        double Isum_MSB_LTP = 0;    // weighted sum current of the LTP cell
+                        double Isum_MSB_LTD = 0;    // weighted sum current of the LTP cell
+                        double IsumMax_LSB = 0;            //the maximum weight sum current (all cells are at high conductance)
+                        double IsumMin_LSB = 0;
+                        double IsumMax_MSB = 0; 
+                        double IsumMin_MSB = 0;                         
+                        double a1Sum_LSB= 0;      // Reference for LSB cell
+						for (int k=0; k<param->nHide; k++) {
+							if ((da1[k]>>n) & 1) {    // if the nth bit of da1[k] is 1
+                                Isum_LSB += arrayHO->ReadCell(j,k,"LSB");                   // the weight sum of the Jth column
+                                Isum_MSB_LTP += arrayHO->ReadCell(j,k,"MSB_LTP");  
+                                Isum_MSB_LTD += arrayHO->ReadCell(j,k,"MSB_LTD");  
+                                a1Sum_LSB += arrayHO->GetMediumCellReadCurrent(j,k);
+                                sumArrayReadEnergyHO += arrayHO->wireCapRow * readVoltageHO * readVoltageHO; // Selected BLs (1T1R) or Selected WLs (cross-point)
+                                sumArrayReadEnergyHO += 2*arrayHO->wireCapRow * readVoltageMSB * readVoltageMSB; // Selected BLs (1T1R) or Selected WLs (cross-point)
+							}
+                            IsumMax_LSB += arrayHO->GetMaxCellReadCurrent(j,k,"LSB");
+                            IsumMax_MSB += arrayHO->GetMaxCellReadCurrent(j,k,"MSB");
+                            IsumMin_LSB += arrayHO->GetMinCellReadCurrent(j,k,"LSB");
+                            IsumMin_MSB += arrayHO->GetMinCellReadCurrent(j,k,"MSB");
+						}                        
+                        sumArrayReadEnergyHO += Isum_LSB * readVoltageHO * readPulseWidthHO;
+                        sumArrayReadEnergyHO += (Isum_MSB_LTP + Isum_MSB_LTD) * readVoltageMSB * readPulseWidthMSB;
+                        int outputDigits;
+                        int outputDigitsLSB = 2*(CurrentToDigits(Isum_LSB, IsumMax_LSB-IsumMin_LSB)-CurrentToDigits(a1Sum_LSB, IsumMax_LSB-IsumMin_LSB)); //minus the reference
+                        //int outputDigitsLSB = CurrentToDigits(Isum_LSB, IsumMax_LSB-IsumMin_LSB)-CurrentToDigits(a1Sum_LSB, IsumMax_LSB-IsumMin_LSB); //minus the reference
+                        int outputDigitsMSB = CurrentToDigits(Isum_MSB_LTP, IsumMax_MSB-IsumMin_MSB)-CurrentToDigits(Isum_MSB_LTD, IsumMax_MSB-IsumMin_MSB); //minus the reference
+                        outputDigits = static_cast<HybridCell*>(arrayHO->cell[0][0])->significance*outputDigitsMSB+outputDigitsLSB;
+                        outN2[j] += DigitsToAlgorithm(outputDigits, pSumMaxAlgorithm)/(static_cast<HybridCell*>(arrayIH->cell[0][0])->significance+1);; 
 					} 
                     else 
                         {// SRAM or digital eNVM
@@ -293,6 +383,7 @@ void Validate() {
                             }
                             if(digitalNVM && parallelRead)
                             {
+                                //printf("Calculating the weight for parallel read-out\n");
                                 double Imin = static_cast<DigitalNVM*>(arrayHO->cell[0][0])->avgMinConductance*static_cast<DigitalNVM*>(arrayHO->cell[0][0])->readVoltage;
                                 double Imax = static_cast<DigitalNVM*>(arrayHO->cell[0][0])->avgMaxConductance*static_cast<DigitalNVM*>(arrayHO->cell[0][0])->readVoltage;
                                 double Isum = 0;    // weighted sum current
@@ -310,8 +401,14 @@ void Validate() {
                                             inputSum += static_cast<DigitalNVM*>(arrayHO->cell[arrayHO->refColumnNumber][k])->conductance*static_cast<DigitalNVM*>(arrayHO->cell[arrayHO->refColumnNumber][k])->readVoltage;                                            
                                         }
                                     }
-                                    int outputDigits = (int) (Isum /(Imax-Imin)); 
+                                    int outputDigits = (int) (Isum /(Imax-Imin)); // the output at the ADC of this column
+                                                                                                               // basically, this is the number of "1" in this column
                                     int outputDigitsRef = (int) (inputSum/(Imax-Imin));
+                                    
+                                    if(outputDigits > param->pSumMaxHardware)
+                                        outputDigits = param->pSumMaxHardware;
+                                    if(outputDigitsRef > param->pSumMaxHardware)
+                                        outputDigitsRef = param->pSumMaxHardware;
                                     outputDigits = outputDigits-outputDigitsRef;
  
                                     Dref = (int)(inputSum/Imin);
