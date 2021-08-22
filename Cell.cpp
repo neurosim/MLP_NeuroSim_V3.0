@@ -647,7 +647,7 @@ DigitalNVM::DigitalNVM(int x, int y) {
 	readEnergy = 0;		// Read pulse width (s) (currently not used)
 	writeEnergy = 0;    // Dynamic variable for calculation of write energy (J)
 	cmosAccess = true;	// True: Pseudo-crossbar (1T1R), false: cross-point
-    isSTTMRAM;  // if it is STTMRAM, then, we can relax the cell area
+    isSTTMRAM = false;  // if it is STTMRAM, then, we can relax the cell area
     parallelRead = true; // if it is a parallel readout scheme
 	resistanceAccess = 5e3;	// The resistance of transistor (Ohm) in Pseudo-crossbar array when turned ON
 	nonlinearIV = false;	// Consider I-V nonlinearity or not (Currently for cross-point array only)
@@ -661,14 +661,14 @@ DigitalNVM::DigitalNVM(int x, int y) {
 	readNoise = false;		// Consider read noise or not
 	sigmaReadNoise = 0.25;	// Sigma of read noise in gaussian distribution
 	gaussian_dist = new std::normal_distribution<double>(0, sigmaReadNoise);    // Set up mean and stddev for read noise
-  if(cmosAccess){ // the reference current for 1T1R cell, should include the resistance
-      double Rmax=1/maxConductance;
-      double Rmin=1/minConductance;
-      refCurrent = readVoltage/(0.5*(Rmax+Rmin+2*resistanceAccess));
-  }
-  else { // the reference current for cross-point array
-      refCurrent = readVoltage * (avgMaxConductance + avgMinConductance) / 2;	// Set up reference current for sensing       
-  }
+    if(cmosAccess){ // the reference current for 1T1R cell, should include the resistance
+        double Rmax=1/maxConductance;
+        double Rmin=1/minConductance;
+        refCurrent = readVoltage/(0.5*(Rmax+Rmin+2*resistanceAccess));
+    }
+    else{ // the reference current for cross-point array
+        refCurrent = readVoltage * (avgMaxConductance + avgMinConductance) / 2;	// Set up reference current for sensing       
+    }
 
 	/* Conductance range variation */
 	conductanceRangeVar =false;    // Consider variation of conductance range or not
@@ -693,7 +693,7 @@ DigitalNVM::DigitalNVM(int x, int y) {
 	}
 
 	heightInFeatureSize = cmosAccess? 4 : 2;	// Cell height = 4F (1T1R) or 2F (cross-point)
-	widthInFeatureSize = cmosAccess? 4 : 2;	// Cell width = 4F (1T1R) or 2F (cross-point)
+	widthInFeatureSize = cmosAccess? 8 : 2;	// Cell width = 4F (1T1R) or 2F (cross-point) default cell width = 8F, can reduce it to 4F if the cell Ron is increased
 }
 
 double DigitalNVM::Read(double voltage) {	// Return read current (A)

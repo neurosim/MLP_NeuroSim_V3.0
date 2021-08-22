@@ -251,7 +251,7 @@ int train_batchsize = param -> numTrainImagesPerBatch;
                                     }
                                     int outputDigits = (int) (Isum /(Imax-Imin)); // the output at the ADC of this column // basically, this is the number of "1" in this column
                                     int outputDigitsRef = (int) (inputSum/(Imax-Imin));
-                                    
+                                    outputDigits = outputDigits-outputDigitsRef;
                                         
                                     Dref = (int)(inputSum/Imin);
                                     Isum=0;
@@ -440,8 +440,8 @@ int train_batchsize = param -> numTrainImagesPerBatch;
                                         }
                                     }
                                     int outputDigits = (int) (Isum /(Imax-Imin)); // the output at the ADC of this column
-                                                                                                               // basically, this is the number of "1" in this column
-                                    int outputDigitsRef = (int) (inputSum/(Imax-Imin));
+                                    int outputDigitsRef = (int) (inputSum/(Imax-Imin)); // basically, this is the number of "1" in this column
+                                    outputDigits = outputDigits-outputDigitsRef;
                                             
                                     Dref = (int)(inputSum/Imin);
                                     Isum=0;
