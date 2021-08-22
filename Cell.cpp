@@ -258,21 +258,21 @@ void IdealDevice::Write(double deltaWeightNormalized, double weight, double minW
 /* Real Device */
 RealDevice::RealDevice(int x, int y) { 
 	this->x = x; this->y = y;	// Cell location: x (column) and y (row) start from index 0
-	maxConductance = 1e-5;		// Maximum cell conductance (S)
-	minConductance = 4.76e-7;	// Minimum cell conductance (S)
+	maxConductance = 3.8462e-8;		// Maximum cell conductance (S)
+	minConductance = 3.0769e-9;	// Minimum cell conductance (S)
 	avgMaxConductance = maxConductance; // Average maximum cell conductance (S)
 	avgMinConductance = minConductance; // Average minimum cell conductance (S)
 	conductance = minConductance;	// Current conductance (S) (dynamic variable)
 	conductancePrev = conductance;	// Previous conductance (S) (dynamic variable)
 	readVoltage = 0.5;	// On-chip read voltage (Vr) (V)
 	readPulseWidth = 5e-9;	// Read pulse width (s) (will be determined by ADC)
-	writeVoltageLTP = 2;	// Write voltage (V) for LTP or weight increase
-	writeVoltageLTD = 2;	// Write voltage (V) for LTD or weight decrease
-	writePulseWidthLTP = 8e-8;	// Write pulse width (s) for LTP or weight increase
-	writePulseWidthLTD = 8e-8;	// Write pulse width (s) for LTD or weight decrease
+	writeVoltageLTP = 3.2;	// Write voltage (V) for LTP or weight increase
+	writeVoltageLTD = 2.8;	// Write voltage (V) for LTD or weight decrease
+	writePulseWidthLTP = 300e-6;	// Write pulse width (s) for LTP or weight increase
+	writePulseWidthLTD = 300e-6;	// Write pulse width (s) for LTD or weight decrease
 	writeEnergy = 0;	// Dynamic variable for calculation of write energy (J)
-	maxNumLevelLTP = 31;	// Maximum number of conductance states during LTP or weight increase
-	maxNumLevelLTD = 31;	// Maximum number of conductance states during LTD or weight decrease
+	maxNumLevelLTP = 97;	// Maximum number of conductance states during LTP or weight increase
+	maxNumLevelLTD = 100;	// Maximum number of conductance states during LTD or weight decrease
 	numPulse = 0;	// Number of write pulses used in the most recent write operation (dynamic variable)
 	cmosAccess = true;	// True: Pseudo-crossbar (1T1R), false: cross-point
     FeFET = false;		// True: FeFET structure (Pseudo-crossbar only, should be cmosAccess=1)
@@ -289,14 +289,14 @@ RealDevice::RealDevice(int x, int y) {
 	nonlinearWrite = true;	// Consider weight update nonlinearity or not
 	nonIdenticalPulse = false;	// Use non-identical pulse scheme in weight update or not
 	if (nonIdenticalPulse) {
-		VinitLTP = 3.5;	// Initial write voltage for LTP or weight increase (V)
-		VstepLTP = 0.01;	// Write voltage step for LTP or weight increase (V)
-		VinitLTD = -0.5;		// Initial write voltage for LTD or weight decrease (V)
-		VstepLTD = -0.01; 	// Write voltage step for LTD or weight decrease (V)
-		PWinitLTP = 100e-9;	// Initial write pulse width for LTP or weight increase (s)
-		PWstepLTP = 0e-9;	// Write pulse width for LTP or weight increase (s)
-		PWinitLTD = 100e-9;	// Initial write pulse width for LTD or weight decrease (s)
-		PWstepLTD = 0e-9;	// Write pulse width for LTD or weight decrease (s)
+		VinitLTP = 2.85;	// Initial write voltage for LTP or weight increase (V)
+		VstepLTP = 0.05;	// Write voltage step for LTP or weight increase (V)
+		VinitLTD = 2.1;		// Initial write voltage for LTD or weight decrease (V)
+		VstepLTD = 0.05; 	// Write voltage step for LTD or weight decrease (V)
+		PWinitLTP = 75e-9;	// Initial write pulse width for LTP or weight increase (s)
+		PWstepLTP = 5e-9;	// Write pulse width for LTP or weight increase (s)
+		PWinitLTD = 75e-9;	// Initial write pulse width for LTD or weight decrease (s)
+		PWstepLTD = 5e-9;	// Write pulse width for LTD or weight decrease (s)
 		writeVoltageSquareSum = 0;	// Sum of V^2 of non-identical pulses (dynamic variable)
 	}
 	readNoise = false;		// Consider read noise or not
@@ -306,19 +306,19 @@ RealDevice::RealDevice(int x, int y) {
 	std::mt19937 localGen;	// It's OK not to use the external gen, since here the device-to-device vairation is a one-time deal
 	localGen.seed(std::time(0));
 	
-	// Device-to-device weight update variation
-	NL_LTP = 4.22;	// LTP nonlinearity
-	NL_LTD = -4.22;	// LTD nonlinearity
+	/* Device-to-device weight update variation */
+	NL_LTP = 2.4;	// LTP nonlinearity
+	NL_LTD = -4.88;	// LTD nonlinearity
 	sigmaDtoD = 0;	// Sigma of device-to-device weight update vairation in gaussian distribution
 	gaussian_dist2 = new std::normal_distribution<double>(0, sigmaDtoD);	// Set up mean and stddev for device-to-device weight update vairation
 	paramALTP = getParamA(NL_LTP + (*gaussian_dist2)(localGen)) * maxNumLevelLTP;	// Parameter A for LTP nonlinearity
 	paramALTD = getParamA(NL_LTD + (*gaussian_dist2)(localGen)) * maxNumLevelLTD;	// Parameter A for LTD nonlinearity
 
-	// Cycle-to-cycle weight update variation
-	sigmaCtoC = 0.005* (maxConductance - minConductance);	// Sigma of cycle-to-cycle weight update vairation: defined as the percentage of conductance range
+	/* Cycle-to-cycle weight update variation */
+	sigmaCtoC = 0.035* (maxConductance - minConductance);	// Sigma of cycle-to-cycle weight update vairation: defined as the percentage of conductance range
 	gaussian_dist3 = new std::normal_distribution<double>(0, sigmaCtoC);    // Set up mean and stddev for cycle-to-cycle weight update vairation
 
-	// Conductance range variation
+	/* Conductance range variation */
 	conductanceRangeVar = false;    // Consider variation of conductance range or not
 	maxConductanceVar = 0;  // Sigma of maxConductance variation (S)
 	minConductanceVar = 0;  // Sigma of minConductance variation (S)
@@ -337,8 +337,9 @@ RealDevice::RealDevice(int x, int y) {
 		//  minConductance = avgMinConductance + (*gaussian_dist_minConductance)(localGen);
 		//} while (minConductance >= maxConductance || maxConductance < 0 || minConductance < 0);
 	}
-    heightInFeatureSize = cmosAccess? 4 : 2; // Cell height = 4F (Pseudo-crossbar) or 2F (cross-point)
-    widthInFeatureSize = cmosAccess? (FeFET? 6 : 4) : 2; //// Cell width = 6F (FeFET) or 4F (Pseudo-crossbar) or 2F (cross-point)
+ 
+        heightInFeatureSize = cmosAccess? 4 : 2; // Cell height = 4F (Pseudo-crossbar) or 2F (cross-point)
+        widthInFeatureSize = cmosAccess? (FeFET? 6 : 4) : 2; //// Cell width = 6F (FeFET) or 4F (Pseudo-crossbar) or 2F (cross-point)
 }
  
 double RealDevice::Read(double voltage) {	// Return read current (A)
