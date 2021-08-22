@@ -48,7 +48,7 @@ Updates on Jan. 20th, 2020:
 2. Calibrate FinFET technology library (<20nm)
 
 Updates on Aug. 21st, 2021:
-1. add the hybrid precision synapse as device option. 
+1. add the hybrid precision synapse (3T1C+NVM, 2T1F) as device option. You can find more information on this in the ICONS'19 paper mentioned above.  
 2. add batch size as an input parameter (in param.cpp). 
 
 ## References related to this tool
