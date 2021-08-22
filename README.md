@@ -14,7 +14,7 @@ If you use the tool or adapt the tool in your work or publication, you are requi
 
 P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm framework for benchmarking synaptic devices and array architectures,*§ IEEE International Electron Devices Meeting (IEDM)*, 2017, San Francisco, USA.
 
-If you use the new features in this version (e.g. the advanced optimization methods such as momentum, Adagrad, RMSprop, Adam; the hybrid precision synapse (3T1C+NVM or 2T1F), you are required to cite the following reference:
+If you use the new features in this version (e.g. the advanced optimization methods such as momentum, Adagrad, RMSprop, Adam; the hybrid precision synapse such as 3T1C+NVM or 2T1F), you are required to cite the following reference:
 
 Y. Luo, X. Peng and S. Yu, " MLP+NeuroSimV3.0: Improving On-chip Learning Performance with Device to Algorithm Optimizations," 2019 ACM the International Conference on Neuromorphic Systems (ICONS), ACM, New York, NY, USA. 
 
