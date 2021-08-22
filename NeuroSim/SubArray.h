@@ -59,6 +59,8 @@
 #include "SwitchMatrix.h"
 #include "ShiftAdd.h"
 #include "Subtractor.h"
+#include "MultilevelSenseAmp.h"
+#include "MultilevelSAEncoder.h"
 
 // include the .h file for the new circuit component
 #include "WLNewDecoderDriver.h"
@@ -136,7 +138,8 @@ public:
 	SwitchMatrix    slSwitchMatrix; 
 	SwitchMatrix    blSwitchMatrix;     // In hybridcell case, it is for MSB BL
 	SwitchMatrix    wlSwitchMatrix;     // In hybridcell case, it is for MSB access transistor gate
-    SwitchMatrix    plSwitchMatrix;     //  controls the two power gate for 3T1C+2PCM and 2T1F cells;
+    SwitchMatrix    plSwitchMatrix;     // controls the two power gate for 3T1C+2PCM and 2T1F cells;
+    SwitchMatrix    bcSwitchMatrix;     // controls the body contact for 2T1F
     SwitchMatrix    wlSwitchMatrix_LSB; // for the LSB access transistor gate 
     SwitchMatrix    blSwitchMatrix_LSB; // for the LSB access transistor source
     
@@ -147,6 +150,8 @@ public:
     
 	ReadCircuit readCircuit;
 	VoltageSenseAmp voltageSenseAmp;
+	MultilevelSAEncoder multilevelSAEncoder;
+	MultilevelSenseAmp multilevelSenseAmp;
 	Precharger precharger;
 	SenseAmp senseAmp;
 	RowDecoder colDecoder;

@@ -85,7 +85,6 @@ public:
     
     double widthAccessNMOS;  // for the 2T1F,3T1C cell where access transistor is needed. 
     double widthAccessPMOS; 
-    double widthStorageNode; // the width of the transistor as the storage node
 };
 
 #endif /* MEMCELL_H_ */
