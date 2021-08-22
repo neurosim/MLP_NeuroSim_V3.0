@@ -36,47 +36,43 @@
 *   Xiaochen Peng   Email: xpeng15 at asu dot edu
 ********************************************************************************/
 
-#ifndef NEUROSIM_FORMULA_H_
-#define NEUROSIM_FORMULA_H_
+#ifndef PRECHARGER_H_
+#define PRECHARGER_H_
 
+#include "typedef.h"
+#include "InputParameter.h"
 #include "Technology.h"
+#include "MemCell.h"
+#include "FunctionUnit.h"
 
-#define MAX(a,b) (((a)> (b))?(a):(b))
-#define MIN(a,b) (((a)< (b))?(a):(b))
+class Precharger: public FunctionUnit {
+public:
+	Precharger(const InputParameter& _inputParameter, const Technology& _tech, const MemCell& _cell);
+	virtual ~Precharger() {}
+	const InputParameter& inputParameter;
+	const Technology& tech;
+	const MemCell& cell;
 
-/* Calculate MOSFET gate capacitance */
-double CalculateGateCap(double width, Technology tech);
+	/* Functions */
+	void PrintProperty(const char* str);
+	void Initialize(int _numCol, double _resLoad, double _activityColWrite, int _numReadCellPerOperationNeuro, int _numWriteCellPerOperationNeuro);
+	void CalculateArea(double _newHeight, double _newWidth, AreaModify _option);
+	void CalculateLatency(double _rampInput, double _capLoad, double numRead, double numWrite);
+	void CalculatePower(double numRead, double numWrite);
 
-double CalculateGateArea(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *height, double *width);
+	/* Properties */
+	bool initialized;	/* Initialization flag */
+	double capLoad, resLoad;
+	double capOutputBitlinePrecharger;
+	double capWireLoadPerColumn, resWireLoadPerColumn;
+	double enableLatency;
+	int numCol;			/* Number of columns */
+	double widthPMOSBitlinePrecharger, widthPMOSBitlineEqual;
+	double capLoadPerColumn;
+	double rampInput, rampOutput;
+	double activityColWrite;
+	int numReadCellPerOperationNeuro;
+	int numWriteCellPerOperationNeuro;
+};
 
-/* Calculate the capacitance of a logic gate */
-void CalculateGateCapacitance(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *capInput, double *capOutput);
-
-double CalculateDrainCap(
-		double width, int type,
-		double heightTransistorRegion, Technology tech);
-
-double CalculateGateLeakage(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double temperature, Technology tech);
-
-double CalculateOnResistance(double width, int type, double temperature, Technology tech);
-
-double CalculateTransconductance(double width, int type, Technology tech);
-
-double horowitz(double tr, double beta, double rampInput, double *rampOutput);
-
-double CalculatePassGateArea(double widthNMOS, double widthPMOS, Technology tech, int numFold, double *height, double *width);
-
-double NonlinearResistance(double R, double NL, double Vw, double Vr, double V);
-
-#endif /* FORMULA_H_ */
+#endif /* PRECHARGER_H_ */

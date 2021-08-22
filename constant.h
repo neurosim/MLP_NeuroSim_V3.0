@@ -36,47 +36,52 @@
 *   Xiaochen Peng   Email: xpeng15 at asu dot edu
 ********************************************************************************/
 
-#ifndef NEUROSIM_FORMULA_H_
-#define NEUROSIM_FORMULA_H_
+#ifndef CONSTANT_H_
+#define CONSTANT_H_
 
-#include "Technology.h"
+#define INV		0
+#define NOR		1
+#define NAND	2
 
-#define MAX(a,b) (((a)> (b))?(a):(b))
-#define MIN(a,b) (((a)< (b))?(a):(b))
+#define NMOS	0
+#define PMOS	1
 
-/* Calculate MOSFET gate capacitance */
-double CalculateGateCap(double width, Technology tech);
+#define MAX_NMOS_SIZE	100
+#define MIN_NMOS_SIZE	2	//1.5
 
-double CalculateGateArea(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *height, double *width);
+#define MAX_TRANSISTOR_HEIGHT 28
 
-/* Calculate the capacitance of a logic gate */
-void CalculateGateCapacitance(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *capInput, double *capOutput);
+#define MIN_GAP_BET_P_AND_N_DIFFS	3.5 //2
+#define MIN_GAP_BET_SAME_TYPE_DIFFS	1.6	//1.5
+#define MIN_GAP_BET_GATE_POLY		2.8	//1.5
+#define MIN_GAP_BET_CONTACT_POLY	0.7	//0.75
+#define CONTACT_SIZE				1.3	//1
+#define MIN_WIDTH_POWER_RAIL		3.4	//2
+#define MIN_POLY_EXT_DIFF			1.0	// Minimum poly extension beyond diffusion region
+#define MIN_GAP_BET_FIELD_POLY		1.6	// Field poly means the poly above the field oxide (outside the active region)
+#define POLY_WIDTH					1.0
+#define M2_PITCH					3.2
+#define M3_PITCH					2.8
 
-double CalculateDrainCap(
-		double width, int type,
-		double heightTransistorRegion, Technology tech);
+#define AVG_RATIO_LEAK_2INPUT_NAND 0.48
+#define AVG_RATIO_LEAK_3INPUT_NAND 0.31
+#define AVG_RATIO_LEAK_2INPUT_NOR  0.95
+#define AVG_RATIO_LEAK_3INPUT_NOR  0.62
 
-double CalculateGateLeakage(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double temperature, Technology tech);
+#define W_SENSE_P		7.5
+#define W_SENSE_N		3.75
+#define W_SENSE_ISO		12.5
+#define W_SENSE_EN		5.0
+#define W_SENSE_MUX		9.0
 
-double CalculateOnResistance(double width, int type, double temperature, Technology tech);
+#define IR_DROP_TOLERANCE 			0.1
 
-double CalculateTransconductance(double width, int type, Technology tech);
+#define HEIGHT_WIDTH_RATIO_LIMIT	5
 
-double horowitz(double tr, double beta, double rampInput, double *rampOutput);
+#define RATIO_READ_THRESHOLD_VS_VOLTAGE	0.2
 
-double CalculatePassGateArea(double widthNMOS, double widthPMOS, Technology tech, int numFold, double *height, double *width);
+#define	ROW_MODE	0	// Connect to rows
+#define	COL_MODE	1	// Connect to columns
 
-double NonlinearResistance(double R, double NL, double Vw, double Vr, double V);
+#endif /* CONSTANT_H_ */
 
-#endif /* FORMULA_H_ */

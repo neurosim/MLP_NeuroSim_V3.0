@@ -36,47 +36,33 @@
 *   Xiaochen Peng   Email: xpeng15 at asu dot edu
 ********************************************************************************/
 
-#ifndef NEUROSIM_FORMULA_H_
-#define NEUROSIM_FORMULA_H_
+#ifndef FUNCTIONUNIT_H_
+#define FUNCTIONUNIT_H_
 
-#include "Technology.h"
+class FunctionUnit {
+public:
+	FunctionUnit();
+	virtual ~FunctionUnit() {}
 
-#define MAX(a,b) (((a)> (b))?(a):(b))
-#define MIN(a,b) (((a)< (b))?(a):(b))
+	/* Functions */
+	virtual void PrintProperty(const char* str);
+	virtual void MagicLayout();
+	virtual void OverrideLayout();
 
-/* Calculate MOSFET gate capacitance */
-double CalculateGateCap(double width, Technology tech);
+	/* Properties */
+	double height;		/* Unit: m */
+	double width;		/* Unit: m */
+	double area;		/* Unit: m^2 */
+	double emptyArea;		/* Unit: m^2 */
+	double usedArea;		/* Unit: m^2 */
+	double totalArea;		/* Unit: m^2 */
+	double readLatency, writeLatency;		/* Unit: s */
+    double transferReadLatency, transferWriteLatency,transferLatency; // for the hybridCell only
+	double readDynamicEnergy, writeDynamicEnergy;	/* Unit: J */
+    double transferReadDynamicEnergy, transferWriteDynamicEnergy, transferDynamicEnergy; // for the hybridCell only
+	double leakage;		/* Unit: W */
+	double newWidth, newHeight;
+	double readPower, writePower;
+};
 
-double CalculateGateArea(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *height, double *width);
-
-/* Calculate the capacitance of a logic gate */
-void CalculateGateCapacitance(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *capInput, double *capOutput);
-
-double CalculateDrainCap(
-		double width, int type,
-		double heightTransistorRegion, Technology tech);
-
-double CalculateGateLeakage(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double temperature, Technology tech);
-
-double CalculateOnResistance(double width, int type, double temperature, Technology tech);
-
-double CalculateTransconductance(double width, int type, Technology tech);
-
-double horowitz(double tr, double beta, double rampInput, double *rampOutput);
-
-double CalculatePassGateArea(double widthNMOS, double widthPMOS, Technology tech, int numFold, double *height, double *width);
-
-double NonlinearResistance(double R, double NL, double Vw, double Vr, double V);
-
-#endif /* FORMULA_H_ */
+#endif /* FUNCTIONUNIT_H_ */

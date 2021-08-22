@@ -36,47 +36,44 @@
 *   Xiaochen Peng   Email: xpeng15 at asu dot edu
 ********************************************************************************/
 
-#ifndef NEUROSIM_FORMULA_H_
-#define NEUROSIM_FORMULA_H_
+#ifndef ROWDECODER_H_
+#define ROWDECODER_H_
 
+#include "typedef.h"
+#include "InputParameter.h"
 #include "Technology.h"
+#include "MemCell.h"
+#include "FunctionUnit.h"
 
-#define MAX(a,b) (((a)> (b))?(a):(b))
-#define MIN(a,b) (((a)< (b))?(a):(b))
+class RowDecoder: public FunctionUnit {
+public:
+	RowDecoder(const InputParameter& _inputParameter, const Technology& _tech, const MemCell& _cell);
+	virtual ~RowDecoder() {}
+	const InputParameter& inputParameter;
+	const Technology& tech;
+	const MemCell& cell;
 
-/* Calculate MOSFET gate capacitance */
-double CalculateGateCap(double width, Technology tech);
+	/* Functions */
+	void PrintProperty(const char* str);
+	void Initialize(DecoderMode _mode, int _numAddrRow, bool _MUX);
+	void CalculateArea(double _newHeight, double _newWidth, AreaModify _option);
+	void CalculateLatency(double _rampInput, double _capLoad1, double _capLoad2, double numRead, double numWrite);
+	void CalculatePower(double numRead, double numWrite);
 
-double CalculateGateArea(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *height, double *width);
+	/* Properties */
+	bool initialized;	/* Initialization flag */
+	int numAddrRow;		/* Number of rows */
+	double capLoad1;	// REGULAR: general capLoad, MUX: the NMOS Tg gates
+	double capLoad2;	// MUX: the PMOS Tg gates
+	int numColNor, numNorPerCol, numColNand, numNandPerCol, numColInv, numInvPerCol;
+	int numRowNor, numNorPerRow, numRowNand, numNandPerRow, numRowInv, numInvPerRow;
 
-/* Calculate the capacitance of a logic gate */
-void CalculateGateCapacitance(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *capInput, double *capOutput);
+	double widthInvN, widthInvP, widthNandN, widthNandP, widthNorN, widthNorP, widthDriverInvN, widthDriverInvP;
+	int numInv, numNand, numNor, numMetalConnection;
+	double capInvInput, capInvOutput, capNandInput, capNandOutput, capNorInput, capNorOutput, capDriverInvInput, capDriverInvOutput;
+	double rampInput, rampOutput;
+	DecoderMode mode;	// ROW or COLUMN mode
+	bool MUX;	// MUX mode
+};
 
-double CalculateDrainCap(
-		double width, int type,
-		double heightTransistorRegion, Technology tech);
-
-double CalculateGateLeakage(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double temperature, Technology tech);
-
-double CalculateOnResistance(double width, int type, double temperature, Technology tech);
-
-double CalculateTransconductance(double width, int type, Technology tech);
-
-double horowitz(double tr, double beta, double rampInput, double *rampOutput);
-
-double CalculatePassGateArea(double widthNMOS, double widthPMOS, Technology tech, int numFold, double *height, double *width);
-
-double NonlinearResistance(double R, double NL, double Vw, double Vr, double V);
-
-#endif /* FORMULA_H_ */
+#endif /* ROWDECODER_H_ */

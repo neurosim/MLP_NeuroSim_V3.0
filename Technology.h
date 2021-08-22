@@ -36,47 +36,49 @@
 *   Xiaochen Peng   Email: xpeng15 at asu dot edu
 ********************************************************************************/
 
-#ifndef NEUROSIM_FORMULA_H_
-#define NEUROSIM_FORMULA_H_
+#ifndef TECHNOLOGY_H_
+#define TECHNOLOGY_H_
 
-#include "Technology.h"
+#include "typedef.h"
 
-#define MAX(a,b) (((a)> (b))?(a):(b))
-#define MIN(a,b) (((a)< (b))?(a):(b))
+class Technology {
+public:
+	Technology();
+	virtual ~Technology() {}
 
-/* Calculate MOSFET gate capacitance */
-double CalculateGateCap(double width, Technology tech);
+	/* Functions */
+	void PrintProperty();
+	void Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap);
+	
+	/* Properties */
+	bool initialized;	/* Initialization flag */
+	int featureSizeInNano; /*Process feature size, Unit: nm */
+	double featureSize;	/* Process feature size, Unit: m */
+	double RRAMFeatureSize;	/* Process feature size of RRAM, Unit: m */
+	DeviceRoadmap deviceRoadmap;	/* HP or LSTP */
+	double vdd;			/* Supply voltage, Unit: V */
+	double vth;				/* Threshold voltage, Unit: V */
+	double heightFin;	/* Fin height, Unit: m */
+	double widthFin;	/* Fin width, Unit: m */
+	double PitchFin;	/* Fin pitch, Unit: m */
+	double phyGateLength;	/* Physical gate length, Unit: m */
+	double capIdealGate;	/* Ideal gate capacitance, Unit: F/m */
+	double capFringe;		/* Fringe capacitance, Unit: F/m */
+	double capJunction;		/* Junction bottom capacitance, Cj0, Unit: F/m^2 */
+	double capOverlap;		/* Overlap capacitance, Cover in MASTAR, Unit: F/m */
+	double capSidewall;		/* Junction sidewall capacitance, Cjsw, Unit: F/m */
+	double capDrainToChannel;	/* Junction drain to channel capacitance, Cjswg, Unit: F/m */
+	double buildInPotential;	/* Bottom junction built-in potential(PB in BSIM4 model), Unit: V */	
+	double pnSizeRatio;		/* PMOS to NMOS size ratio */
+	double effectiveResistanceMultiplier;	/* Extra resistance due to vdsat */
+	double currentOnNmos[101];		/* NMOS saturation current, Unit: A/m */
+	double currentOnPmos[101];		/* PMOS saturation current, Unit: A/m */
+	double currentOffNmos[101];	/* NMOS off current (from 300K to 400K), Unit: A/m */
+	double currentOffPmos[101]; /* PMOS off current (from 300K to 400K), Unit: A/m */
+    double current_gmNmos;		/* NMOS current at 0.7*vdd for gm calculation, Unit: A/m/V*/ 
+    double current_gmPmos;		/* PMOS current at 0.7*vdd for gm calculation, Unit: A/m/V*/ 
+  
+	double capPolywire;	/* Poly wire capacitance, Unit: F/m */
+};
 
-double CalculateGateArea(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *height, double *width);
-
-/* Calculate the capacitance of a logic gate */
-void CalculateGateCapacitance(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *capInput, double *capOutput);
-
-double CalculateDrainCap(
-		double width, int type,
-		double heightTransistorRegion, Technology tech);
-
-double CalculateGateLeakage(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double temperature, Technology tech);
-
-double CalculateOnResistance(double width, int type, double temperature, Technology tech);
-
-double CalculateTransconductance(double width, int type, Technology tech);
-
-double horowitz(double tr, double beta, double rampInput, double *rampOutput);
-
-double CalculatePassGateArea(double widthNMOS, double widthPMOS, Technology tech, int numFold, double *height, double *width);
-
-double NonlinearResistance(double R, double NL, double Vw, double Vr, double V);
-
-#endif /* FORMULA_H_ */
+#endif /* TECHNOLOGY_H_ */

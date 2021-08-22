@@ -36,47 +36,66 @@
 *   Xiaochen Peng   Email: xpeng15 at asu dot edu
 ********************************************************************************/
 
-#ifndef NEUROSIM_FORMULA_H_
-#define NEUROSIM_FORMULA_H_
+#include <iostream>
+#include "FunctionUnit.h"
 
-#include "Technology.h"
+using namespace std;
 
-#define MAX(a,b) (((a)> (b))?(a):(b))
-#define MIN(a,b) (((a)< (b))?(a):(b))
+FunctionUnit::FunctionUnit() {
+	height = width = 0;
+	area = 0;
+	emptyArea = 0;
+	usedArea = 0;
+	totalArea = 0;	// may use it if the circuit units are scattered
+	readLatency = writeLatency = 0;
+    transferReadLatency=transferWriteLatency=0;
+    transferLatency = 0;
 
-/* Calculate MOSFET gate capacitance */
-double CalculateGateCap(double width, Technology tech);
+	readDynamicEnergy = writeDynamicEnergy = 0;
+    transferReadDynamicEnergy = transferWriteDynamicEnergy=0;
+    transferDynamicEnergy==0;
+    
+	leakage = 0;
 
-double CalculateGateArea(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *height, double *width);
+	newWidth = newHeight = 0;
+	readPower = writePower = 0;
+}
 
-/* Calculate the capacitance of a logic gate */
-void CalculateGateCapacitance(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double heightTransistorRegion, Technology tech,
-		double *capInput, double *capOutput);
+void FunctionUnit::PrintProperty(const char* str) {
+	cout << "---------------------------------------------------------" << endl;
+	cout << str << endl;
+	cout << "Area = " << height*1e6 << "um x " << width*1e6 << "um = " << area*1e12 << "um^2" << endl;
+	if (totalArea)
+		cout << "Total Area = " << totalArea*1e12 << "um^2" << endl;
+	cout << "Timing:" << endl;
+	cout << " - Read Latency = " << readLatency*1e9 << "ns" << endl;
+	cout << " - Write Latency = " << writeLatency*1e9 << "ns" << endl;
+	cout << "Power:" << endl;
+	cout << " - Read Dynamic Energy = " << readDynamicEnergy*1e12 << "pJ" << endl;
+	cout << " - Write Dynamic Energy = " << writeDynamicEnergy*1e12 << "pJ" << endl;
+	cout << " - Leakage Power = " << leakage*1e6 << "uW" << endl;
+	cout << " - Read Power = " << readPower*1e6 << "uW" << endl;
+	cout << " - Write Power = " << writePower*1e6 << "uW" << endl;
+}
 
-double CalculateDrainCap(
-		double width, int type,
-		double heightTransistorRegion, Technology tech);
+void FunctionUnit::MagicLayout() {
+	if (newHeight) {
+		width = area / newHeight;
+		height = newHeight;
+	} else if (newWidth) {
+		height = area / newWidth;
+		width = newWidth;
+	}
+}
 
-double CalculateGateLeakage(
-		int gateType, int numInput,
-		double widthNMOS, double widthPMOS,
-		double temperature, Technology tech);
+void FunctionUnit::OverrideLayout() {
+	if (newHeight && newWidth) {
+		height = newHeight;
+		width = newWidth;
+	} else {
+		puts("Need to provide both newHeight and newWidth for OverrideLayout()");
+		exit(-1);
+	}
+	area = height * width;
+}
 
-double CalculateOnResistance(double width, int type, double temperature, Technology tech);
-
-double CalculateTransconductance(double width, int type, Technology tech);
-
-double horowitz(double tr, double beta, double rampInput, double *rampOutput);
-
-double CalculatePassGateArea(double widthNMOS, double widthPMOS, Technology tech, int numFold, double *height, double *width);
-
-double NonlinearResistance(double R, double NL, double Vw, double Vr, double V);
-
-#endif /* FORMULA_H_ */
