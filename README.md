@@ -48,8 +48,8 @@ Updates on Jan. 20th, 2020:
 2. Calibrate FinFET technology library (<20nm)
 
 Updates on Aug. 21st, 2021:
-1. add the hybrid precision synapse (3T1C+NVM, 2T1F) as device option. You can find more information on this in the ICONS'19 paper mentioned above.  
-2. add batch size as an input parameter (in param.cpp). 
+1. Add the hybrid precision synapse (3T1C+NVM, 2T1F) as device option. You can find more information on this in the ICONS'19 paper mentioned above.  
+2. Add batch size as an input parameter (in param.cpp). 
 
 ## References related to this tool
 1. P.-Y. Chen, S. Yu, "Technological benchmark of analog synaptic devices for neuro-inspired architectures," IEEE Design & Test, 2019.
