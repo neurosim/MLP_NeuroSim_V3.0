@@ -6,15 +6,16 @@ This is the released version 3.0 (Mar. 1st, 2019) for the tool. This version ext
 
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo. 
 
-If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu (shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Anni Lu(alu75@gatech.edu) or Yandong Luo (yandongluo@gatech.edu).
+If you have logistic questions or comments on the model, please contact Prof. Shimeng Yu (shimeng.yu@ece.gatech.edu), and if you have technical questions or comments, please contact Anni Lu(alu75@gatech.edu) or Yandong Luo (yandongluo@gatech.edu).  
 
 This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCENT, one of the SRC/DARPA JUMP centers. 
 
-If you use the tool or adapt the tool in your work or publication, you are required to cite the following reference:
+If you use the tool or adapt the tool in your work or publication, you are required to cite the following reference:  
 
 P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm framework for benchmarking synaptic devices and array architectures,*§ IEEE International Electron Devices Meeting (IEDM)*, 2017, San Francisco, USA.
 
 If you use the new features in this version (e.g. the advanced optimization methods such as momentum, Adagrad, RMSprop, Adam; the hybrid precision synapse (3T1C+NVM or 2T1F), you are required to cite the following reference:
+
 Y. Luo, X. Peng and S. Yu, " MLP+NeuroSimV3.0: Improving On-chip Learning Performance with Device to Algorithm Optimizations," 2019 ACM the International Conference on Neuromorphic Systems (ICONS), ACM, New York, NY, USA. 
 
 ## File lists
@@ -45,6 +46,10 @@ For the usage of this tool, please refer to the manual.
 Updates on Jan. 20th, 2020: 
 1. In sub-array, use linear-region transistor in MUX, Switch Matrix and across-transistor in array.
 2. Calibrate FinFET technology library (<20nm)
+
+Updates on Aug. 21st, 2021:
+1. add the hybrid precision synapse as device option. 
+2. add batch size as an input parameter (in param.cpp). 
 
 ## References related to this tool
 1. P.-Y. Chen, S. Yu, "Technological benchmark of analog synaptic devices for neuro-inspired architectures," IEEE Design & Test, 2019.
