@@ -2,7 +2,7 @@
 
 The MLP+NeuroSim framework was developed by [Prof. Shimeng Yu's group](http://shimeng.ece.gatech.edu/) (Georgia Institute of Technology). The model is made publicly available on a non-commercial basis. Copyright of the model is maintained by the developers, and the model is distributed under the terms of the [Creative Commons Attribution-NonCommercial 4.0 International Public License](http://creativecommons.org/licenses/by-nc/4.0/legalcode)
 
-This is the released version 3.0 (Mar. 1st, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more training algorithms such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs (e.g. STT-MRAM) based synaptical array supports parallel read-out is introduced to reduce latency. 
+This is the released version 3.0 (Mar. 1st, 2019) for the tool. This version extends the algoritihm weights from (0,1) in V2.0 to (-1,1) in V3.0. Besides, more optimization methods such as momentum method, Adagrad, RMSprop, Adam are added. The digital eNVMs (e.g. STT-MRAM) based synaptical array supports parallel read-out is introduced to reduce latency. Hybrid precision synapses with good linearity are added to provide better training accuracy
 
 Developers: Pai-Yu Chen, Xiaochen Peng and Yandong Luo. 
 
@@ -13,6 +13,9 @@ This research is supported by NSF CAREER award, NSF/SRC E2CDA program, and ASCEN
 If you use the tool or adapt the tool in your work or publication, you are required to cite the following reference:
 
 P.-Y. Chen, X. Peng, S. Yu, ※NeuroSim+: An integrated device-to-algorithm framework for benchmarking synaptic devices and array architectures,*§ IEEE International Electron Devices Meeting (IEDM)*, 2017, San Francisco, USA.
+
+If you use the new features in this version (e.g. the advanced optimization methods such as momentum, Adagrad, RMSprop, Adam; the hybrid precision synapse (3T1C+NVM or 2T1F), you are required to cite the following reference:
+Y. Luo, X. Peng and S. Yu, " MLP+NeuroSimV3.0: Improving On-chip Learning Performance with Device to Algorithm Optimizations," 2019 ACM the International Conference on Neuromorphic Systems (ICONS), ACM, New York, NY, USA. 
 
 ## File lists
 1. MATLAB fitting script: `nonlinear_fit.m`
