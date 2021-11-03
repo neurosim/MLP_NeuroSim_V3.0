@@ -58,7 +58,7 @@ Param::Param() {
 	maxWeight = 1;	// Upper bound of weight value
 	minWeight = -1;	// Lower bound of weight value
 	/*Optimization method 
-	Available option include: "SGD", "Momentum", "Adagrad", "RMSprop" and "Adam"*/
+	Available option include: "SGD", "Momentum", "RMSprop" and "Adam"*/
 	optimization_type = "SGD";
 
 
