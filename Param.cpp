@@ -85,4 +85,33 @@ Param::Param() {
 	clkFreq = 2e9;		// Clock frequency (Hz)
  
 }
+void Param::UpdateFromArgs(int argc, char* argv[]) {
+
+    if (argc > 1) {
+		if (strcmp(argv[1], "SGD") == 0)
+
+			optimization_type = "SGD";
+
+		else if (strcmp(argv[1], "Momentum") == 0)
+
+			optimization_type = "Momentum";
+
+		else if (strcmp(argv[1], "RMSprop") == 0)
+
+			optimization_type = "RMSprop";
+
+		else if (strcmp(argv[1], "Adam") == 0)
+
+			optimization_type = "Adam";
+	    }
+
+    if (argc > 2) {
+        numTrainImagesPerBatch = atoi(argv[2]);
+    }
+
+	if (argc > 3) {
+        nHide = atoi(argv[3]);
+    }
+
+}
 
