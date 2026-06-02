@@ -66,6 +66,7 @@ clean:
 
 # Run simulation
 NOW := $(shell date +"%Y%m%d_%H%M%S")
+SAFE_ARGS = $(subst  ,_,$(ARGS))
 run:
-	stdbuf -o 0 ./$(MAINS:.cpp=) | tee log_$(NOW).txt
+	stdbuf -o 0 ./$(MAINS:.cpp=) $(ARGS)| tee log_$(SAFE_ARGS).txt
 
