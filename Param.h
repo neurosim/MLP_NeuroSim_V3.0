@@ -44,6 +44,7 @@
 class Param {
 public:
 	Param();
+	void UpdateFromArgs(int argc, char* argv[]);
 
 	/* MNIST dataset */
 	int numMnistTrainImages;// # of training images in MNIST
