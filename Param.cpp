@@ -37,6 +37,8 @@
 ********************************************************************************/
 
 #include <string>
+#include <iostream>
+#include <cstring>
 #include "math.h"
 #include "Param.h"
 
