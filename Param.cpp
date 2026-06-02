@@ -104,6 +104,11 @@ void Param::UpdateFromArgs(int argc, char* argv[]) {
 
 			optimization_type = "Adam";
 	    }
+	    else {
+        std::cerr << "Error: Unknown optimizer '" << argv[1] << "'.\n";
+        std::cerr << "Allowed values: SGD, Momentum, RMSprop, Adam\n";
+        std::exit(1);
+    	}
 
     if (argc > 2) {
         numTrainImagesPerBatch = atoi(argv[2]);
@@ -112,6 +117,7 @@ void Param::UpdateFromArgs(int argc, char* argv[]) {
 	if (argc > 3) {
         nHide = atoi(argv[3]);
     }
+	
 
 }
 
