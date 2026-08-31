@@ -1,0 +1,112 @@
+# NS3 CI script for GCC
+
+# Any scheduled pipeline for GCC should define a variable, named
+# "RELEASE", that has a value "weekly". Also, a variable "GCC" should be set
+# to True.
+
+# We support from 10 to the latest version. Check if everything builds fine
+# under debug, default, and optimized, on Linux.
+# The distro used is Ubuntu - the logic is:
+# - Test minimum and maximum GCC version
+# - Do not test if it's the default version installed (already tested as Ubuntu test)
+# Note: the following is the list of default gcc versions on Ubuntu:
+# - focal (20.04LTS) 9
+# - jammy (22.04LTS) 11
+# - kinetic (22.10) 12
+# - lunar (23.04) 12
+# - lunar (23.10) 13
+# - noble (24.04LTS) 13
+
+.weekly-gcc-base:
+  extends: .base-build
+  rules:
+    - if: $RELEASE == "weekly"
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      allow_failure: true
+  before_script:
+    - apt update
+    - apt upgrade -y
+    - DEBIAN_FRONTEND=noninteractive apt install -y
+      $COMPILER cmake ninja-build ccache
+      python3 python3-dev
+      gsl-bin libgsl-dev $LIBGSL
+      libboost-all-dev
+      libgtk-3-dev
+      libfl-dev
+      libxml2 libxml2-dev
+      libopenmpi-dev openmpi-bin openmpi-common openmpi-doc
+      libsqlite3-dev sqlite3
+      libeigen3-dev
+      qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+      ssh git
+
+weekly-gcc:
+  rules:
+    - if: $RELEASE == "weekly"
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: manual
+      allow_failure: true
+  stage: pre-build
+  script:
+    - echo "Starting GCC jobs"
+
+# GCC 10 (not tested here since it is configured for Ubuntu 20.04)
+
+# GCC 13
+weekly-build-gcc-13-debug:
+  extends: .weekly-gcc-base
+  needs: ["weekly-gcc"]
+  image: ubuntu:23.04
+  stage: build
+  variables:
+    MODE: debug
+    COMPILER: g++-13
+    LIBGSL: libgsl27
+
+weekly-build-gcc-13-default:
+  extends: .weekly-gcc-base
+  needs: ["weekly-gcc"]
+  image: ubuntu:23.04
+  stage: build
+  variables:
+    MODE: default
+    COMPILER: g++-13
+    LIBGSL: libgsl27
+
+# Aug. 26, 2023: --disable-eigen is needed to prevent a -Werror=unused-variable
+weekly-build-gcc-13-optimized:
+  extends: .weekly-gcc-base
+  needs: ["weekly-gcc"]
+  image: ubuntu:23.04
+  stage: build
+  variables:
+    MODE: optimized
+    COMPILER: g++-13
+    LIBGSL: libgsl27
+    EXTRA_OPTIONS: --disable-eigen
+
+weekly-test-gcc-13-default:
+  extends: .weekly-gcc-base
+  image: ubuntu:23.04
+  stage: test
+  needs: ["weekly-build-gcc-13-default"]
+  dependencies:
+    - weekly-build-gcc-13-default
+  variables:
+    MODE: default
+    COMPILER: g++-13
+    LIBGSL: libgsl27
+
+# Aug. 26, 2023: --disable-eigen is needed to prevent a -Werror=unused-variable
+weekly-test-gcc-13-optimized:
+  extends: .weekly-gcc-base
+  image: ubuntu:23.04
+  stage: test
+  needs: ["weekly-build-gcc-13-optimized"]
+  dependencies:
+    - weekly-build-gcc-13-optimized
+  variables:
+    MODE: optimized
+    COMPILER: g++-13
+    LIBGSL: libgsl27
+    EXTRA_OPTIONS: --disable-eigen
