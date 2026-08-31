@@ -1,81 +1,113 @@
-if(${ENABLE_TESTS})
-  set(test_sources)
-  if(test IN_LIST libs_to_build)
-    # Create a list of imported directories to include during libtest build
-    set(test_imported_include_directories)
-    foreach(libname ${ns3-libs} ${ns3-contrib-libs})
-      list(APPEND test_imported_include_directories $<TARGET_PROPERTY:${libname},INTERFACE_INCLUDE_DIRECTORIES>)
-    endforeach()
+set(source_files
+    helper/wimax-helper.cc
+    model/cid.cc
+    model/cid-factory.cc
+    model/wimax-net-device.cc
+    model/bs-net-device.cc
+    model/ss-net-device.cc
+    model/wimax-mac-header.cc
+    model/wimax-phy.cc
+    model/wimax-channel.cc
+    model/ofdm-downlink-frame-prefix.cc
+    model/wimax-connection.cc
+    model/ss-record.cc
+    model/mac-messages.cc
+    model/dl-mac-messages.cc
+    model/ul-mac-messages.cc
+    model/simple-ofdm-wimax-phy.cc
+    model/simple-ofdm-wimax-channel.cc
+    model/send-params.cc
+    model/ss-manager.cc
+    model/connection-manager.cc
+    model/bs-uplink-scheduler.cc
+    model/bs-uplink-scheduler-simple.cc
+    model/bs-uplink-scheduler-mbqos.cc
+    model/bs-uplink-scheduler-rtps.cc
+    model/bs-scheduler.cc
+    model/bs-scheduler-simple.cc
+    model/bs-scheduler-rtps.cc
+    model/wimax-mac-queue.cc
+    model/burst-profile-manager.cc
+    model/ss-scheduler.cc
+    model/service-flow.cc
+    model/service-flow-manager.cc
+    model/service-flow-record.cc
+    model/ss-link-manager.cc
+    model/bs-link-manager.cc
+    model/bandwidth-manager.cc
+    model/crc8.cc
+    model/ul-job.cc
+    model/snr-to-block-error-rate-record.cc
+    model/snr-to-block-error-rate-manager.cc
+    model/simple-ofdm-send-param.cc
+    model/ss-service-flow-manager.cc
+    model/bs-service-flow-manager.cc
+    model/ipcs-classifier.cc
+    model/ipcs-classifier-record.cc
+    model/wimax-tlv.cc
+    model/cs-parameters.cc
+    model/wimax-mac-to-mac-header.cc
+)
 
-    # Import include directories of dependencies to build libtest
-    target_include_directories(${libtest} PUBLIC ${test_imported_include_directories})
-    unset(test_imported_include_directories)
+set(header_files
+    helper/wimax-helper.h
+    model/wimax-channel.h
+    model/wimax-net-device.h
+    model/bs-net-device.h
+    model/ss-net-device.h
+    model/cid.h
+    model/cid-factory.h
+    model/ofdm-downlink-frame-prefix.h
+    model/wimax-connection.h
+    model/ss-record.h
+    model/mac-messages.h
+    model/dl-mac-messages.h
+    model/ul-mac-messages.h
+    model/wimax-phy.h
+    model/simple-ofdm-wimax-phy.h
+    model/simple-ofdm-wimax-channel.h
+    model/send-params.h
+    model/service-flow.h
+    model/ss-manager.h
+    model/connection-manager.h
+    model/wimax-mac-header.h
+    model/wimax-mac-queue.h
+    model/crc8.h
+    model/service-flow-manager.h
+    model/bs-uplink-scheduler.h
+    model/bs-uplink-scheduler-simple.h
+    model/bs-uplink-scheduler-mbqos.h
+    model/bs-uplink-scheduler-rtps.h
+    model/ul-job.h
+    model/bs-scheduler.h
+    model/bs-scheduler-simple.h
+    model/bs-scheduler-rtps.h
+    model/service-flow-record.h
+    model/snr-to-block-error-rate-record.h
+    model/snr-to-block-error-rate-manager.h
+    model/simple-ofdm-send-param.h
+    model/ss-service-flow-manager.h
+    model/bs-service-flow-manager.h
+    model/cs-parameters.h
+    model/ipcs-classifier-record.h
+    model/wimax-tlv.h
+    model/ipcs-classifier.h
+    model/bvec.h
+    model/wimax-mac-to-mac-header.h
+)
 
-    # Define the libtest as an object to build test-runner
-    set(test_sources $<TARGET_OBJECTS:${libtest}>)
-  endif()
-
-  if(WIN32)
-    # DLL linking shenanigans prevent loading symbols unused by a certain program,
-    # so link the tests libraries (here built as objects) directly to the test runner
-    add_executable(test-runner test-runner.cc ${ns3-libs-tests} ${test_sources})
-    if(${NS3_MONOLIB})
-      target_link_libraries(
-              test-runner ${lib-ns3-monolib} ${ns3-contrib-libs}
-      )
-    else()
-      target_link_libraries(
-              test-runner ${ns3-libs} ${ns3-contrib-libs}
-      )
-    endif()
-  else()
-    add_executable(test-runner ${test_sources} test-runner.cc)
-
-    if(${NS3_MONOLIB})
-      target_link_libraries(
-        test-runner ${LIB_AS_NEEDED_PRE} ${ns3-libs-tests} ${lib-ns3-monolib} ${ns3-contrib-libs} ${LIB_AS_NEEDED_POST}
-      )
-    else()
-      target_link_libraries(
-        test-runner ${LIB_AS_NEEDED_PRE} ${ns3-libs-tests} ${ns3-libs} ${ns3-contrib-libs} ${LIB_AS_NEEDED_POST}
-      )
-    endif()
-  endif()
-  set_runtime_outputdirectory(
-    test-runner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/ ""
-  )
-  add_dependencies(test-runner test-runner-examples-as-tests)
-  add_dependencies(all-test-targets test-runner)
-endif()
-
-build_exec(
-        EXECNAME bench-scheduler
-        SOURCE_FILES bench-scheduler.cc
-        LIBRARIES_TO_LINK ${libcore}
-        EXECUTABLE_DIRECTORY_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/
-      )
-
-if(network IN_LIST libs_to_build)
-  build_exec(
-        EXECNAME bench-packets
-        SOURCE_FILES bench-packets.cc
-        LIBRARIES_TO_LINK ${libnetwork}
-        EXECUTABLE_DIRECTORY_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/
-      )
-
-  build_exec(
-      EXECNAME print-introspected-doxygen
-      SOURCE_FILES print-introspected-doxygen.cc
-      LIBRARIES_TO_LINK ${ns3-libs} ${ns3-contrib-libs}
-      EXECUTABLE_DIRECTORY_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/
-    )
-endif()
-
-if(core IN_LIST ns3-all-enabled-modules)
-  build_exec(
-    EXECNAME perf-io
-    SOURCE_FILES perf/perf-io.cc
-    LIBRARIES_TO_LINK ${libcore}
-    EXECUTABLE_DIRECTORY_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/utils/perf/
-  )
-endif()
+build_lib(
+  LIBNAME wimax
+  SOURCE_FILES ${source_files}
+  HEADER_FILES ${header_files}
+  LIBRARIES_TO_LINK ${libinternet}
+                    ${libpropagation}
+  TEST_SOURCES
+    test/mac-messages-test.cc
+    test/phy-test.cc
+    test/qos-test.cc
+    test/ss-mac-test.cc
+    test/wimax-fragmentation-test.cc
+    test/wimax-service-flow-test.cc
+    test/wimax-tlv-test.cc
+)
