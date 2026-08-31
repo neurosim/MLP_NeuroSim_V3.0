@@ -1,55 +1,17 @@
 build_lib(
-  LIBNAME uan
+  LIBNAME topology-read
   SOURCE_FILES
-    helper/acoustic-modem-energy-model-helper.cc
-    helper/uan-helper.cc
-    model/acoustic-modem-energy-model.cc
-    model/uan-channel.cc
-    model/uan-header-common.cc
-    model/uan-header-rc.cc
-    model/uan-mac-aloha.cc
-    model/uan-mac-cw.cc
-    model/uan-mac-rc-gw.cc
-    model/uan-mac-rc.cc
-    model/uan-mac.cc
-    model/uan-net-device.cc
-    model/uan-noise-model-default.cc
-    model/uan-noise-model.cc
-    model/uan-phy-dual.cc
-    model/uan-phy-gen.cc
-    model/uan-phy.cc
-    model/uan-prop-model-ideal.cc
-    model/uan-prop-model-thorp.cc
-    model/uan-prop-model.cc
-    model/uan-transducer-hd.cc
-    model/uan-transducer.cc
-    model/uan-tx-mode.cc
+    helper/topology-reader-helper.cc
+    model/inet-topology-reader.cc
+    model/orbis-topology-reader.cc
+    model/rocketfuel-topology-reader.cc
+    model/topology-reader.cc
   HEADER_FILES
-    helper/acoustic-modem-energy-model-helper.h
-    helper/uan-helper.h
-    model/acoustic-modem-energy-model.h
-    model/uan-channel.h
-    model/uan-header-common.h
-    model/uan-header-rc.h
-    model/uan-mac-aloha.h
-    model/uan-mac-cw.h
-    model/uan-mac-rc-gw.h
-    model/uan-mac-rc.h
-    model/uan-mac.h
-    model/uan-net-device.h
-    model/uan-noise-model-default.h
-    model/uan-noise-model.h
-    model/uan-phy-dual.h
-    model/uan-phy-gen.h
-    model/uan-phy.h
-    model/uan-prop-model-ideal.h
-    model/uan-prop-model-thorp.h
-    model/uan-prop-model.h
-    model/uan-transducer-hd.h
-    model/uan-transducer.h
-    model/uan-tx-mode.h
-  LIBRARIES_TO_LINK ${libmobility}
-                    ${libenergy}
-  TEST_SOURCES test/uan-energy-model-test.cc
-               test/uan-test.cc
+    helper/topology-reader-helper.h
+    model/inet-topology-reader.h
+    model/orbis-topology-reader.h
+    model/rocketfuel-topology-reader.h
+    model/topology-reader.h
+  LIBRARIES_TO_LINK ${libnetwork}
+  TEST_SOURCES test/rocketfuel-topology-reader-test-suite.cc
 )
