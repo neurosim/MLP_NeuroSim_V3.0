@@ -1,0 +1,96 @@
+# NS3 CI script for per-commit jobs
+
+# Defines the per-commit jobs. They are executed for any branch
+.base-per-commit-compile:
+  extends: .base-build
+  except:
+    variables:
+      - $CPPYY == "True"
+      - $RELEASE == "weekly"
+      - $RELEASE == "daily"
+  image: archlinux
+  before_script:
+    - pacman-key --init
+    - pacman -Syu --noconfirm
+      base-devel gcc clang libc++ cmake ninja ccache
+      python
+      boost gsl gtk3 openmpi
+      openssh git
+
+# Build stage
+per-commit-clang-optimized-libc++:
+  extends: .base-per-commit-compile
+  stage: build
+  variables:
+    MODE: optimized
+    COMPILER: clang++
+    CXXFLAGS: -stdlib=libc++
+
+per-commit-gcc-debug:
+  extends: .base-per-commit-compile
+  stage: build
+  variables:
+    MODE: debug
+    COMPILER: g++
+
+per-commit-gcc-default:
+  extends: .base-per-commit-compile
+  stage: build
+  variables:
+    MODE: default
+    COMPILER: g++
+
+per-commit-gcc-optimized:
+  extends: .base-per-commit-compile
+  stage: build
+  variables:
+    MODE: optimized
+    COMPILER: g++
+
+per-commit-disabled-precompiled-headers:
+  extends: .base-per-commit-compile
+  stage: build
+  variables:
+    MODE: debug
+    COMPILER: g++
+    EXTRA_OPTIONS: --disable-precompiled-headers
+
+per-commit-clang-disabled-asserts-logs:
+  extends: .base-per-commit-compile
+  stage: build
+  variables:
+    MODE: debug
+    COMPILER: clang++
+    EXTRA_OPTIONS: --disable-asserts --disable-logs
+
+# Test stage
+per-commit-gcc-default-test:
+  extends: .base-per-commit-compile
+  stage: test
+  needs: ["per-commit-gcc-default"]
+  dependencies:
+    - per-commit-gcc-default
+  variables:
+    MODE: default
+    COMPILER: g++
+
+per-commit-gcc-optimized-test:
+  extends: .base-per-commit-compile
+  stage: test
+  needs: ["per-commit-gcc-optimized"]
+  dependencies:
+    - per-commit-gcc-optimized
+  variables:
+    MODE: optimized
+    COMPILER: g++
+
+per-commit-clang-optimized-libc++-test:
+  extends: .base-per-commit-compile
+  stage: test
+  needs: ["per-commit-clang-optimized-libc++"]
+  dependencies:
+    - per-commit-clang-optimized-libc++
+  variables:
+    MODE: optimized
+    COMPILER: clang++
+    CXXFLAGS: -stdlib=libc++

@@ -1,0 +1,107 @@
+# NS3 CI script for the documentation
+# For the moment we do not install the generated documentation
+#
+.doc:
+  stage: documentation
+  before_script:
+    - pacman-key --init
+    - pacman -Syu --noconfirm
+      base-devel ninja cmake python ccache gsl gtk3 boost openmpi openssh
+      graphviz imagemagick texlive-basic texlive-bin texlive-binextra texlive-latexextra
+      texlive-fontutils texlive-fontsrecommended texlive-mathscience python-sphinx wget
+    #  doxygen
+    # dia is archived
+    - pacman --noconfirm -U https://archive.archlinux.org/packages/d/dia/dia-0.97.3-9-x86_64.pkg.tar.zst
+    # temporary revert to Doxygen 1.11.0. The package has been recompiled
+    # without spdlog and wizard support to fix a library dependency.
+    - wget http://www.nsnam.org/packages/doxygen-1.11.0-4-x86_64.pkg.tar.zst
+    - pacman --noconfirm -U doxygen-1.11.0-4-x86_64.pkg.tar.zst
+    # no policy is a good policy.
+    - mv /etc/ImageMagick-7/policy.xml /etc/ImageMagick-7/policy.xml.bak
+    # - sed -i "s/EPS,PDF,//g" /etc/ImageMagick-7/policy.xml
+    # - sed -i "s/none/read\ |\ write/g" /etc/ImageMagick-7/policy.xml
+  image: archlinux
+  timeout: 2h
+  interruptible: true
+  dependencies: []
+  # artifacts:
+  #   paths:
+  #     - public
+
+doxygen:
+  extends: .doc
+  script:
+    - mkdir -p $CCACHE_BASEDIR_VALUE
+    - export CCACHE_BASEDIR=${PWD}
+    - export CCACHE_DIR=${PWD}/$CCACHE_BASEDIR_VALUE
+    # debug build is the fastest, and we do not need to actually execute anything, just the examples for introspection.
+    - export MPI_CI=1
+    - CXX=$COMPILER ./ns3 configure -d debug -GNinja --enable-examples --enable-tests --enable-asserts --enable-mpi
+    - ./ns3 build
+    - ./ns3 build assemble-introspected-command-line
+    # - mkdir -p public/doxygen
+    # The following four lines were needed when ns-3 had warnings, and
+    # it was necessary to have a filter to check only the files touched by a MR.
+    # - git remote add ns-3-origin https://gitlab.com/nsnam/ns-3-dev.git || true
+    # - git fetch ns-3-origin
+    # - export CHANGED_FILES=$(git diff --name-only ns-3-origin/master --diff-filter=d | tr '\n' ' ' | sed 's/ $//g;s/ /\\\|/g')
+    # - doc/doxygen.warnings.report.sh -f "$CHANGED_FILES"
+    - doc/doxygen.warnings.report.sh
+    # Just need to check doc/introspected-command-line.h and doc/introspected-doxygen.h
+    - python3 utils/check-style-clang-format.py --no-formatting --no-tabs doc/introspected-doxygen.h doc/introspected-command-line.h
+    - ./ns3 clean
+    # print the doxygen version - just to double check what has been used.
+    - doxygen -v
+    # - doxygen doc/doxygen.conf
+    # - mv doc/html/ public/doxygen
+  cache:
+    # Reuse the ccache from the per-commit-gcc-debug job
+    key: "ccache-per-commit-gcc-debug"
+    paths:
+      - $CCACHE_BASEDIR_VALUE/
+    policy: pull
+  variables:
+    CCACHE_BASEDIR_VALUE: ns-3-ccache-storage
+    COMPILER: g++
+  artifacts:
+    paths:
+      - doc/doxygen.warnings.log
+    when: always
+  # tags:
+  #   - nsnam
+  #   - linux
+
+.sphinx-doc:
+  extends: .doc
+  script:
+    # - mkdir -p public/$DOC_DIR
+    - cd doc/$DOC_DIR
+    - make html
+    - make latexpdf
+    # - mv build/html ../../public/$DOC_DIR
+    # - mv build/latex/ns-3-$DOC_DIR.pdf ../../public/
+
+manual:
+  extends: .sphinx-doc
+  variables:
+    DOC_DIR: manual
+
+tutorial:
+  extends: .sphinx-doc
+  variables:
+    DOC_DIR: tutorial
+
+models:
+  extends: .sphinx-doc
+  variables:
+    DOC_DIR: models
+
+contributing:
+  extends: .sphinx-doc
+  variables:
+    DOC_DIR: contributing
+
+installation:
+  extends: .sphinx-doc
+  variables:
+    DOC_DIR: installation
